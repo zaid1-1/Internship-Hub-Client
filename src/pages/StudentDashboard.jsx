@@ -1,11 +1,53 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Spinner, Alert } from 'react-bootstrap'
 import axios, { BASE_URL, authHeaders } from '../api'
 import {
   StudentLayout, SectionLabel, Card, ProgressBar, BtnOutline, BtnGhost,
   InternshipCard, idNameMap,
 } from '../components/shared'
 import '../css/StudentDashboard.css'
+
+// Small motivational quote card - GET /api/quotes/daily proxies ZenQuotes
+// server-side (see routes/quotes.js), fetched here with the same plain
+// on-mount axios call as everything else in this file. Loading/error
+// states use react-bootstrap's Spinner and Alert directly - a second,
+// equally simple react-bootstrap usage alongside shared.jsx's Modal, in
+// a spot with no Figma design to match against (the prototype has no
+// quote widget). Kept local to this file rather than added to
+// shared.jsx, same "small page-local UI pieces get duplicated" rule
+// CompanyScreens.jsx's own Section component already follows.
+function DailyQuote() {
+  const [quote, setQuote] = useState(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/api/quotes/daily`).then(res => {
+      setQuote(res.data)
+    }).catch(() => setError(true))
+  }, [])
+
+  return (
+    <Card className="p-4 mb-4 quote-card">
+      <SectionLabel>Daily Motivation</SectionLabel>
+      {error ? (
+        <Alert variant="secondary" className="mb-0">
+          Couldn't load today's quote right now.
+        </Alert>
+      ) : quote ? (
+        <blockquote className="quote-text">
+          "{quote.q}"
+          <footer className="quote-author">— {quote.a}</footer>
+        </blockquote>
+      ) : (
+        <div className="quote-loading">
+          <Spinner animation="border" size="sm" />
+          <span>Loading today's quote...</span>
+        </div>
+      )}
+    </Card>
+  )
+}
 
 function greeting() {
   const h = new Date().getHours()
@@ -135,6 +177,8 @@ export default function StudentDashboard() {
           <h1>{greeting()}, {profile.first_name}.</h1>
           <p>Here is an overview of your internship search.</p>
         </div>
+
+        <DailyQuote />
 
         <div className="dash-top-row">
           <Card className="p-4">
