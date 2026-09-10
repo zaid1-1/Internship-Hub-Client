@@ -1,0 +1,29 @@
+.ifw-wrap {
+  padding: 32px;
+  max-width: 760px;
+}
+
+.ifw-header {
+  margin-bottom: 20px;
+}
+
+.ifw-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 2px 0 4px;
+}
+
+.ifw-header p {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.ifw-actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}

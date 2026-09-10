@@ -4,11 +4,15 @@ import axios, { BASE_URL, authHeaders } from '../api'
 import {
   CompanyLayout, SectionLabel, Card, StatusPill, MatchChip, SkillTag,
   BtnPrimary, BtnOutline, BtnGhost, ActionBtn, TableHeader, idNameMap,
+  Input, Badge,
 } from '../components/shared'
 import '../css/CompanyDashboard.css'
 import '../css/MyOpportunities.css'
 import '../css/CompanyCandidates.css'
 import '../css/CompanyCandidateProfile.css'
+import '../css/ProfilePage.css'
+import '../css/InternshipForm.css'
+import '../css/InternshipPreview.css'
 
 function Stub({ label, title }) {
   return (
@@ -20,6 +24,44 @@ function Stub({ label, title }) {
       </div>
     </CompanyLayout>
   )
+}
+
+// Same accordion pattern as ProfilePage.jsx's own local Section component
+// (not exported from there, so duplicated here - same call already made
+// for breakdownLabels below, matching this project's established
+// "small page-local UI pieces get duplicated, only true cross-page
+// pieces live in shared.jsx" convention). Styles come from ProfilePage.css
+// (imported above) - .accordion-section/.accordion-header/.accordion-body.
+function Section({ id, title, openSection, setOpenSection, children }) {
+  const isOpen = openSection === id
+  return (
+    <div className={`accordion-section ${isOpen ? 'open' : ''}`}>
+      <button className="accordion-header" onClick={() => setOpenSection(isOpen ? null : id)}>
+        <span>{title}</span>
+        <span className="accordion-chevron">{isOpen ? '▲' : '▼'}</span>
+      </button>
+      {isOpen && <div className="accordion-body">{children}</div>}
+    </div>
+  )
+}
+
+// internship_duration / experience_level enum values - see
+// backend-readme.md's Enum reference table. Sending anything else 500s,
+// same as every other enum column in this project.
+const DURATION_OPTIONS = ['1-2 months', '3 months', '4-6 months', '6+ months']
+const EXPERIENCE_LEVEL_OPTIONS = [
+  'No experience required',
+  'Some experience preferred',
+  'Relevant coursework required',
+]
+
+const BLANK_INTERNSHIP_FORM = {
+  title: '', description: '', field_id: '',
+  location_id: '', work_arrangement_id: '', internship_type_id: '',
+  duration: '', experience_level: '', application_deadline: '',
+  required_degree_level_id: '', required_study_field_id: '',
+  responsibilities: '', requirements: '', benefits: '', additional_info: '',
+  external_application_url: '',
 }
 
 // Same breakdown labels as InternshipDetails.jsx's student-facing match
@@ -283,16 +325,546 @@ export function MyOpportunities() {
   )
 }
 
+// ============================================================
+// CREATE / EDIT INTERNSHIP (spec 43-44) - "Same structure as Create
+// Internship," per spec 44, so this is one shared form component driven
+// by a `mode` prop, same idea as ProfilePage.jsx's SubResourceList being
+// one component reused for projects/experience/certifications instead
+// of three near-identical ones.
+//
+// Two scope calls made while building this form, both about spec
+// wording that doesn't map onto a real schema column:
+// - Spec 43's Education section lists "Academic level if required" as a
+//   third field alongside Degree and Field of study, but internships
+//   only has two education-related columns (required_degree_level_id,
+//   required_study_field_id) - there's no separate "academic level"
+//   anywhere in schema.sql. Folded into the Degree field's own label
+//   ("Degree / Academic Level") rather than inventing a column that
+//   doesn't exist in the database.
+// - The "Preview" action (both here and from My Opportunities' "View")
+//   needs a real, already-created internship to show - there's no
+//   unsaved-draft-preview mechanism anywhere else in this project. So
+//   clicking Preview on an unsaved Create form saves it first (as
+//   Draft if it doesn't already have a status), then opens the same
+//   Preview screen used everywhere else, instead of introducing a
+//   separate "preview unsaved form data" code path.
+// ============================================================
+function InternshipForm({ mode }) {
+  const { id } = useParams()
+  const navigate = useNavigate()
+
+  const [form, setForm] = useState(BLANK_INTERNSHIP_FORM)
+  const [selectedSkills, setSelectedSkills] = useState([])
+  const [availableSkills, setAvailableSkills] = useState([])
+  const [fields, setFields] = useState([])
+  const [locations, setLocations] = useState([])
+  const [workArrangements, setWorkArrangements] = useState([])
+  const [internshipTypes, setInternshipTypes] = useState([])
+  const [educationLevels, setEducationLevels] = useState([])
+  const [studyFields, setStudyFields] = useState([])
+  const [skillSearch, setSkillSearch] = useState('')
+  const [openSection, setOpenSection] = useState('basic')
+  const [loaded, setLoaded] = useState(mode === 'create')
+  const [notFound, setNotFound] = useState(false)
+  const [formError, setFormError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/api/skills`).then(res => setAvailableSkills(res.data))
+    axios.get(`${BASE_URL}/api/fields`).then(res => setFields(res.data))
+    axios.get(`${BASE_URL}/api/locations`).then(res => setLocations(res.data))
+    axios.get(`${BASE_URL}/api/work-arrangements`).then(res => setWorkArrangements(res.data))
+    axios.get(`${BASE_URL}/api/internship-types`).then(res => setInternshipTypes(res.data))
+    axios.get(`${BASE_URL}/api/education-levels`).then(res => setEducationLevels(res.data))
+    axios.get(`${BASE_URL}/api/study-fields`).then(res => setStudyFields(res.data))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Edit mode loads the existing internship via GET /api/internships/mine
+  // filtered client-side to this id - same "fetch once, filter" pattern
+  // as CompanyCandidates/CompanyProfile/ApplicationDetails - rather than
+  // the public GET /api/internships/:id, which increments that
+  // internship's views counter on every call (fine for a public visitor,
+  // wrong for the owning company just opening its own edit form).
+  useEffect(() => {
+    if (mode !== 'edit') return
+    axios.get(`${BASE_URL}/api/internships/mine`, { headers: authHeaders() }).then(res => {
+      const found = res.data.find(i => String(i.id) === id)
+      if (!found) {
+        setNotFound(true)
+        setLoaded(true)
+        return
+      }
+      setForm({
+        title: found.title || '',
+        description: found.description || '',
+        field_id: found.field_id || '',
+        location_id: found.location_id || '',
+        work_arrangement_id: found.work_arrangement_id || '',
+        internship_type_id: found.internship_type_id || '',
+        duration: found.duration || '',
+        experience_level: found.experience_level || '',
+        application_deadline: found.application_deadline ? String(found.application_deadline).slice(0, 10) : '',
+        required_degree_level_id: found.required_degree_level_id || '',
+        required_study_field_id: found.required_study_field_id || '',
+        responsibilities: found.responsibilities || '',
+        requirements: found.requirements || '',
+        benefits: found.benefits || '',
+        additional_info: found.additional_info || '',
+        external_application_url: found.external_application_url || '',
+      })
+      setLoaded(true)
+    }).catch(err => { console.error(err); setNotFound(true); setLoaded(true) })
+
+    axios.get(`${BASE_URL}/api/internships/${id}/skills`).then(res => setSelectedSkills(res.data)).catch(err => console.error(err))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, id])
+
+  const setField = (key, value) => setForm(prev => ({ ...prev, [key]: value }))
+
+  // Create mode: the internship doesn't exist yet, so selected skills are
+  // just held in local state and attached with one junction POST per
+  // skill right after the main create POST returns an id. Edit mode: the
+  // internship already exists, so this mirrors ProfilePage.jsx's own
+  // toggleSkill - an immediate POST/DELETE per click, independent of the
+  // form's own Save button.
+  const toggleSkill = async (skill) => {
+    const isSelected = selectedSkills.some(s => s.id === skill.id)
+    if (mode === 'edit') {
+      try {
+        if (isSelected) {
+          await axios.delete(`${BASE_URL}/api/internships/${id}/skills/${skill.id}`, { headers: authHeaders() })
+        } else {
+          await axios.post(`${BASE_URL}/api/internships/${id}/skills`, { skill_id: skill.id }, { headers: authHeaders() })
+        }
+      } catch (err) {
+        console.error(err)
+        return
+      }
+    }
+    setSelectedSkills(prev => (isSelected ? prev.filter(s => s.id !== skill.id) : [...prev, skill]))
+  }
+
+  // Shared save routine for all three Create actions and Edit's Save/
+  // Preview. Returns the internship id on success (needed by the
+  // Preview button to know where to navigate), or null on failure.
+  const handleSave = async (statusOverride) => {
+    if (!form.title || !form.description || !form.external_application_url) {
+      setFormError('Title, Description, and External Application URL are required.')
+      return null
+    }
+    setFormError('')
+    setSaving(true)
+    try {
+      if (mode === 'create') {
+        const res = await axios.post(
+          `${BASE_URL}/api/internships`,
+          { ...form, status: statusOverride || 'Draft' },
+          { headers: authHeaders() }
+        )
+        const newId = res.data.id
+        for (let i = 0; i < selectedSkills.length; i++) {
+          await axios.post(`${BASE_URL}/api/internships/${newId}/skills`, { skill_id: selectedSkills[i].id }, { headers: authHeaders() })
+        }
+        setSaving(false)
+        return newId
+      } else {
+        await axios.put(`${BASE_URL}/api/internships/${id}`, form, { headers: authHeaders() })
+        setSaving(false)
+        return id
+      }
+    } catch (err) {
+      console.error(err)
+      setSaving(false)
+      setFormError(err.response?.data?.message || err.response?.data?.error || 'Something went wrong. Please try again.')
+      return null
+    }
+  }
+
+  const handleSaveDraft = async () => {
+    const savedId = await handleSave('Draft')
+    if (savedId) navigate('/company/opportunities')
+  }
+
+  const handlePublish = async () => {
+    const savedId = await handleSave('Active')
+    if (savedId) navigate('/company/opportunities')
+  }
+
+  const handleSaveChanges = async () => {
+    const savedId = await handleSave()
+    if (savedId) navigate('/company/opportunities')
+  }
+
+  const handlePreview = async () => {
+    const savedId = await handleSave(mode === 'create' ? 'Draft' : undefined)
+    if (savedId) navigate(`/company/opportunities/${savedId}/preview`)
+  }
+
+  if (mode === 'edit' && notFound) {
+    return (
+      <CompanyLayout>
+        <div className="ifw-wrap">
+          <p className="profile-muted">That opportunity couldn't be found.</p>
+          <BtnOutline onClick={() => navigate('/company/opportunities')}>Back to My Opportunities</BtnOutline>
+        </div>
+      </CompanyLayout>
+    )
+  }
+
+  if (!loaded) {
+    return (
+      <CompanyLayout>
+        <div className="ifw-wrap"><p className="profile-muted">Loading...</p></div>
+      </CompanyLayout>
+    )
+  }
+
+  const filteredSkills = skillSearch
+    ? availableSkills.filter(s => s.name.toLowerCase().includes(skillSearch.toLowerCase()))
+    : availableSkills
+
+  const sectionProps = { openSection, setOpenSection }
+
+  return (
+    <CompanyLayout>
+      <div className="ifw-wrap">
+        <div className="ifw-header">
+          <SectionLabel>{mode === 'create' ? 'Create Opportunity' : 'Edit Opportunity'}</SectionLabel>
+          <h1>{mode === 'create' ? 'Create Internship' : 'Edit Internship'}</h1>
+          <p>Fill in the details below. You can save a draft and come back to finish it later.</p>
+        </div>
+
+        <Section id="basic" title="Basic Information" {...sectionProps}>
+          <div className="field-block">
+            <label className="field-label">Title *</label>
+            <Input placeholder="e.g. Frontend Developer Intern" value={form.title} onChange={v => setField('title', v)} />
+          </div>
+          <div className="field-block">
+            <label className="field-label">Description *</label>
+            <textarea rows={4} className="field-textarea" value={form.description} onChange={e => setField('description', e.target.value)} />
+          </div>
+          <div className="field-block">
+            <label className="field-label">Field</label>
+            <select className="form-select" value={form.field_id} onChange={e => setField('field_id', e.target.value || '')}>
+              <option value="">Not specified</option>
+              {fields.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+            </select>
+          </div>
+        </Section>
+
+        <Section id="details" title="Internship Details" {...sectionProps}>
+          <div className="field-grid">
+            <div className="field-block">
+              <label className="field-label">Location</label>
+              <select className="form-select" value={form.location_id} onChange={e => setField('location_id', e.target.value || '')}>
+                <option value="">Not specified</option>
+                {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+              </select>
+            </div>
+            <div className="field-block">
+              <label className="field-label">Work Arrangement</label>
+              <select className="form-select" value={form.work_arrangement_id} onChange={e => setField('work_arrangement_id', e.target.value || '')}>
+                <option value="">Not specified</option>
+                {workArrangements.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+              </select>
+            </div>
+            <div className="field-block">
+              <label className="field-label">Internship Type</label>
+              <select className="form-select" value={form.internship_type_id} onChange={e => setField('internship_type_id', e.target.value || '')}>
+                <option value="">Not specified</option>
+                {internshipTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="field-block">
+              <label className="field-label">Duration</label>
+              <select className="form-select" value={form.duration} onChange={e => setField('duration', e.target.value || '')}>
+                <option value="">Not specified</option>
+                {DURATION_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div className="field-block">
+              <label className="field-label">Experience Level</label>
+              <select className="form-select" value={form.experience_level} onChange={e => setField('experience_level', e.target.value || '')}>
+                <option value="">Not specified</option>
+                {EXPERIENCE_LEVEL_OPTIONS.map(x => <option key={x} value={x}>{x}</option>)}
+              </select>
+            </div>
+            <div className="field-block">
+              <label className="field-label">Application Deadline</label>
+              <input type="date" className="form-input" value={form.application_deadline} onChange={e => setField('application_deadline', e.target.value || '')} />
+            </div>
+          </div>
+        </Section>
+
+        <Section id="education" title="Education" {...sectionProps}>
+          <div className="field-grid">
+            <div className="field-block">
+              <label className="field-label">Degree / Academic Level</label>
+              <select className="form-select" value={form.required_degree_level_id} onChange={e => setField('required_degree_level_id', e.target.value || '')}>
+                <option value="">Not required</option>
+                {educationLevels.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </div>
+            <div className="field-block">
+              <label className="field-label">Field of Study</label>
+              <select className="form-select" value={form.required_study_field_id} onChange={e => setField('required_study_field_id', e.target.value || '')}>
+                <option value="">Not required</option>
+                {studyFields.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+              </select>
+            </div>
+          </div>
+        </Section>
+
+        <Section id="skills" title="Required Skills" {...sectionProps}>
+          <p className="field-note field-note-spaced">Select the skills a candidate needs from the platform's skill list.</p>
+          {selectedSkills.length > 0 && (
+            <div className="selected-tags-box">
+              {selectedSkills.map(s => (
+                <button key={s.id} className="selected-tag-chip" onClick={() => toggleSkill(s)}>{s.name} ×</button>
+              ))}
+            </div>
+          )}
+          <div className="field-block">
+            <Input placeholder="Search skills..." value={skillSearch} onChange={setSkillSearch} />
+          </div>
+          <div className="tag-toggle-wrap">
+            {filteredSkills.map(s => (
+              <button
+                key={s.id}
+                className={`tag-toggle ${selectedSkills.some(sel => sel.id === s.id) ? 'active' : ''}`}
+                onClick={() => toggleSkill(s)}
+              >
+                {s.name}
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        <Section id="additional" title="Additional Information" {...sectionProps}>
+          <div className="field-block">
+            <label className="field-label">Responsibilities</label>
+            <textarea rows={3} className="field-textarea" value={form.responsibilities} onChange={e => setField('responsibilities', e.target.value)} />
+          </div>
+          <div className="field-block">
+            <label className="field-label">Requirements</label>
+            <textarea rows={3} className="field-textarea" value={form.requirements} onChange={e => setField('requirements', e.target.value)} />
+          </div>
+          <div className="field-block">
+            <label className="field-label">Benefits</label>
+            <textarea rows={3} className="field-textarea" value={form.benefits} onChange={e => setField('benefits', e.target.value)} />
+          </div>
+          <div className="field-block">
+            <label className="field-label">Additional Details</label>
+            <textarea rows={3} className="field-textarea" value={form.additional_info} onChange={e => setField('additional_info', e.target.value)} />
+          </div>
+        </Section>
+
+        <Section id="external" title="External Application" {...sectionProps}>
+          <div className="field-block">
+            <label className="field-label">External Application URL *</label>
+            <Input placeholder="https://yourcompany.com/careers/apply" value={form.external_application_url} onChange={v => setField('external_application_url', v)} />
+            <p className="field-note">Students click Apply and are sent here to actually apply - this platform only tracks that they clicked.</p>
+          </div>
+        </Section>
+
+        {formError && <p className="profile-save-error">{formError}</p>}
+
+        <div className="ifw-actions-row">
+          {mode === 'create' ? (
+            <>
+              <BtnOutline onClick={handleSaveDraft}>{saving ? 'Saving...' : 'Save as Draft'}</BtnOutline>
+              <BtnOutline onClick={handlePreview}>Preview</BtnOutline>
+              <BtnPrimary onClick={handlePublish}>Publish</BtnPrimary>
+            </>
+          ) : (
+            <>
+              <BtnGhost onClick={() => navigate('/company/opportunities')}>Cancel</BtnGhost>
+              <BtnOutline onClick={handlePreview}>Preview</BtnOutline>
+              <BtnPrimary onClick={handleSaveChanges}>{saving ? 'Saving...' : 'Save Changes'}</BtnPrimary>
+            </>
+          )}
+        </div>
+      </div>
+    </CompanyLayout>
+  )
+}
+
 export function CreateInternship() {
-  return <Stub label="Create Opportunity" title="Create Internship" />
+  return <InternshipForm mode="create" />
 }
 
 export function EditInternship() {
-  return <Stub label="Edit Opportunity" title="Edit Internship" />
+  return <InternshipForm mode="edit" />
 }
 
+// ============================================================
+// INTERNSHIP PREVIEW (spec 45) - what the public listing will look like.
+// Reached from My Opportunities' "View" action (any status, including
+// Draft) and from the Create/Edit form's own Preview button. Loads via
+// GET /api/internships/mine filtered client-side to this id - same
+// views-counter-avoidance reasoning as EditInternship above, not the
+// public GET /api/internships/:id.
+// ============================================================
 export function InternshipPreview() {
-  return <Stub label="Preview" title="Internship Preview" />
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [internship, setInternship] = useState(null)
+  const [company, setCompany] = useState(null)
+  const [skills, setSkills] = useState([])
+  const [notFound, setNotFound] = useState(false)
+  const [loaded, setLoaded] = useState(false)
+  const [lookups, setLookups] = useState({
+    locations: {}, workArrangements: {}, internshipTypes: {}, fields: {}, studyFields: {}, educationLevels: {},
+  })
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/api/internships/mine`, { headers: authHeaders() }).then(res => {
+      const found = res.data.find(i => String(i.id) === id)
+      if (!found) { setNotFound(true); setLoaded(true); return }
+      setInternship(found)
+      setLoaded(true)
+    }).catch(err => { console.error(err); setNotFound(true); setLoaded(true) })
+
+    axios.get(`${BASE_URL}/api/internships/${id}/skills`).then(res => setSkills(res.data)).catch(err => console.error(err))
+    axios.get(`${BASE_URL}/api/companies/me`, { headers: authHeaders() }).then(res => setCompany(res.data)).catch(err => console.error(err))
+
+    axios.get(`${BASE_URL}/api/locations`).then(res => setLookups(prev => ({ ...prev, locations: idNameMap(res.data) })))
+    axios.get(`${BASE_URL}/api/work-arrangements`).then(res => setLookups(prev => ({ ...prev, workArrangements: idNameMap(res.data) })))
+    axios.get(`${BASE_URL}/api/internship-types`).then(res => setLookups(prev => ({ ...prev, internshipTypes: idNameMap(res.data) })))
+    axios.get(`${BASE_URL}/api/fields`).then(res => setLookups(prev => ({ ...prev, fields: idNameMap(res.data) })))
+    axios.get(`${BASE_URL}/api/study-fields`).then(res => setLookups(prev => ({ ...prev, studyFields: idNameMap(res.data) })))
+    axios.get(`${BASE_URL}/api/education-levels`).then(res => setLookups(prev => ({ ...prev, educationLevels: idNameMap(res.data) })))
+  }, [id])
+
+  if (notFound) {
+    return (
+      <CompanyLayout>
+        <div className="ipreview-wrap">
+          <p className="profile-muted">That opportunity couldn't be found.</p>
+          <BtnOutline onClick={() => navigate('/company/opportunities')}>Back to My Opportunities</BtnOutline>
+        </div>
+      </CompanyLayout>
+    )
+  }
+
+  if (!loaded || !internship) {
+    return (
+      <CompanyLayout>
+        <div className="ipreview-wrap"><p className="profile-muted">Loading...</p></div>
+      </CompanyLayout>
+    )
+  }
+
+  return (
+    <CompanyLayout>
+      <div className="ipreview-wrap">
+        <button className="cand-back" onClick={() => navigate('/company/opportunities')}>← Back to My Opportunities</button>
+
+        <div className="ipreview-banner">
+          <p className="ipreview-banner-title">Preview Mode</p>
+          <p className="ipreview-banner-desc">This is what students will see once this opportunity is Active.</p>
+        </div>
+
+        <Card className="p-4 mb-4">
+          <div className="ipreview-top">
+            <div>
+              <SectionLabel>Internship Preview</SectionLabel>
+              <h1>{internship.title}</h1>
+              <p className="ipreview-company">{company?.company_name}</p>
+              <div className="ipreview-badges">
+                <StatusPill status={internship.status} />
+                {lookups.workArrangements[internship.work_arrangement_id] && <Badge label={lookups.workArrangements[internship.work_arrangement_id]} />}
+                {lookups.internshipTypes[internship.internship_type_id] && <Badge label={lookups.internshipTypes[internship.internship_type_id]} />}
+              </div>
+            </div>
+            <BtnOutline onClick={() => navigate(`/company/opportunities/${id}/edit`)}>Edit</BtnOutline>
+          </div>
+
+          <div className="ipreview-info-grid">
+            <div>
+              <p className="ipreview-info-label">Location</p>
+              <p className="ipreview-info-value">{lookups.locations[internship.location_id] || 'Not specified'}</p>
+            </div>
+            <div>
+              <p className="ipreview-info-label">Duration</p>
+              <p className="ipreview-info-value">{internship.duration || 'Not specified'}</p>
+            </div>
+            <div>
+              <p className="ipreview-info-label">Deadline</p>
+              <p className="ipreview-info-value">
+                {internship.application_deadline ? new Date(internship.application_deadline).toLocaleDateString() : 'Not specified'}
+              </p>
+            </div>
+            <div>
+              <p className="ipreview-info-label">Field</p>
+              <p className="ipreview-info-value">{lookups.fields[internship.field_id] || 'Not specified'}</p>
+            </div>
+          </div>
+
+          {internship.external_application_url && (
+            <a className="ipreview-apply-link" href={internship.external_application_url} target="_blank" rel="noopener noreferrer">
+              External Apply Button →
+            </a>
+          )}
+        </Card>
+
+        <Card className="p-4 mb-4">
+          <SectionLabel>About the Internship</SectionLabel>
+          <p className="candprofile-text">{internship.description || 'No description provided.'}</p>
+        </Card>
+
+        {internship.responsibilities && (
+          <Card className="p-4 mb-4">
+            <SectionLabel>Responsibilities</SectionLabel>
+            <p className="candprofile-text">{internship.responsibilities}</p>
+          </Card>
+        )}
+
+        <Card className="p-4 mb-4">
+          <SectionLabel>Requirements</SectionLabel>
+          <div className="ipreview-info-grid">
+            <div>
+              <p className="ipreview-info-label">Experience Level</p>
+              <p className="ipreview-info-value">{internship.experience_level || 'Not specified'}</p>
+            </div>
+            <div>
+              <p className="ipreview-info-label">Education Level</p>
+              <p className="ipreview-info-value">{lookups.educationLevels[internship.required_degree_level_id] || 'Not specified'}</p>
+            </div>
+            <div>
+              <p className="ipreview-info-label">Field of Study</p>
+              <p className="ipreview-info-value">{lookups.studyFields[internship.required_study_field_id] || 'Not specified'}</p>
+            </div>
+          </div>
+          {internship.requirements && <p className="candprofile-text" style={{ marginTop: 10 }}>{internship.requirements}</p>}
+        </Card>
+
+        {skills.length > 0 && (
+          <Card className="p-4 mb-4">
+            <SectionLabel>Required Skills</SectionLabel>
+            <div className="candprofile-skill-wrap">
+              {skills.map(s => <SkillTag key={s.id} label={s.name} />)}
+            </div>
+          </Card>
+        )}
+
+        {internship.benefits && (
+          <Card className="p-4 mb-4">
+            <SectionLabel>Benefits</SectionLabel>
+            <p className="candprofile-text">{internship.benefits}</p>
+          </Card>
+        )}
+
+        {internship.additional_info && (
+          <Card className="p-4">
+            <SectionLabel>Additional Information</SectionLabel>
+            <p className="candprofile-text">{internship.additional_info}</p>
+          </Card>
+        )}
+      </div>
+    </CompanyLayout>
+  )
 }
 
 export function CompanyProfileEdit() {

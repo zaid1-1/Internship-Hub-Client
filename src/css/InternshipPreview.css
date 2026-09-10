@@ -1,0 +1,100 @@
+.ipreview-wrap {
+  padding: 32px;
+  max-width: 900px;
+}
+
+.ipreview-banner {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--teal-light);
+  border: 1px solid #99f6e4;
+  border-radius: var(--radius-sm);
+}
+
+.ipreview-banner-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--teal);
+  font-family: var(--font-sans);
+  margin: 0 0 2px;
+}
+
+.ipreview-banner-desc {
+  font-size: 12px;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.ipreview-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ipreview-top h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 2px 0 2px;
+}
+
+.ipreview-company {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0 0 8px;
+}
+
+.ipreview-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ipreview-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.ipreview-info-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-4);
+  font-family: var(--font-sans);
+  margin: 0 0 3px;
+}
+
+.ipreview-info-value {
+  font-size: 13px;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.ipreview-apply-link {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--navy);
+  border-radius: var(--radius);
+}
+
+@media (max-width: 700px) {
+  .ipreview-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
