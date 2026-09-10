@@ -1,0 +1,144 @@
+.cdash-wrap {
+  padding: 32px;
+  max-width: 1040px;
+}
+
+.cdash-header {
+  margin-bottom: 20px;
+}
+
+.cdash-header-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--teal);
+  font-family: var(--font-sans);
+  margin: 0 0 4px;
+}
+
+.cdash-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 0 0 4px;
+}
+
+.cdash-header p {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.cdash-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cdash-stat-tile {
+  padding: 14px 16px;
+  border-left: 4px solid;
+  border-radius: var(--radius-sm);
+}
+
+.cdash-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin: 0 0 2px;
+}
+
+.cdash-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cdash-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cdash-section-heading {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 2px 0 0;
+}
+
+.cdash-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cdash-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+}
+
+.cdash-recent-main {
+  flex: 1;
+  min-width: 160px;
+}
+
+.cdash-recent-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+.cdash-recent-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 2px 0 0;
+}
+
+.cdash-recent-deadline {
+  font-size: 12px;
+  color: var(--text-4);
+  white-space: nowrap;
+}
+
+.cdash-recent-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.cdash-empty {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.cdash-empty p {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0 0 12px;
+}
+
+.cdash-muted {
+  font-size: 13px;
+  color: var(--text-4);
+}
+
+@media (max-width: 900px) {
+  .cdash-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
