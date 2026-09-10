@@ -65,6 +65,10 @@
   color: var(--text-3);
 }
 
+.gaps-muted {
+  color: var(--text-3);
+}
+
 .gaps-positive {
   font-size: 13px;
   color: var(--text-3);

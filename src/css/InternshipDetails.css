@@ -1,7 +1,16 @@
+.page-shell {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
 .details-wrap {
   max-width: 1024px;
   margin: 0 auto;
   padding: 32px 24px;
+}
+
+.details-muted {
+  color: var(--text-3);
 }
 
 .details-breadcrumb {
@@ -24,6 +33,10 @@
 
 .details-breadcrumb button:hover {
   text-decoration: underline;
+}
+
+.details-breadcrumb-current {
+  color: var(--text-1);
 }
 
 .details-grid {
@@ -52,6 +65,11 @@
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.details-head-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .details-title {

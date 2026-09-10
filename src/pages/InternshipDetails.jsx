@@ -6,7 +6,7 @@ import {
   Navbar, StudentLayout, CompanyLogo, SkillTag, Badge, SectionLabel,
   Divider, Card, BtnGhost, AuthModal, idNameMap,
 } from '../components/shared'
-import './InternshipDetails.css'
+import '../css/InternshipDetails.css'
 
 const breakdownLabels = {
   skills: 'Skills',
@@ -134,9 +134,9 @@ export default function InternshipDetails() {
 
   if (!internship) {
     return (
-      <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+      <div className="page-shell">
         <Navbar />
-        <div className="details-wrap"><p style={{ color: 'var(--text-3)' }}>Loading...</p></div>
+        <div className="details-wrap"><p className="details-muted">Loading...</p></div>
       </div>
     )
   }
@@ -149,7 +149,7 @@ export default function InternshipDetails() {
       <div className="details-breadcrumb">
         <button onClick={() => navigate(isStudent ? '/find-internships' : '/browse')}>Find Internships</button>
         <span>/</span>
-        <span style={{ color: 'var(--text-1)' }}>{internship.title}</span>
+        <span className="details-breadcrumb-current">{internship.title}</span>
       </div>
 
       <div className="details-grid">
@@ -157,7 +157,7 @@ export default function InternshipDetails() {
           <Card className="p-4">
             <div className="details-head-top">
               <CompanyLogo initials={initials} size="lg" />
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="details-head-info">
                 <h1 className="details-title">{internship.title}</h1>
                 <button className="details-company-link" onClick={() => navigate(`/companies/${internship.company_id}`)}>
                   {company?.company_name}
@@ -390,7 +390,7 @@ export default function InternshipDetails() {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+    <div className="page-shell">
       <Navbar />
       {content}
     </div>

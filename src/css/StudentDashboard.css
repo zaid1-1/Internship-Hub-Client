@@ -3,6 +3,18 @@
   max-width: 1024px;
 }
 
+.dash-muted {
+  color: var(--text-3);
+}
+
+.dash-teal-icon {
+  color: var(--teal);
+}
+
+.dash-btn-spacer {
+  margin-top: 14px;
+}
+
 .dash-header {
   margin-bottom: 28px;
 }
@@ -171,6 +183,10 @@
   margin: 0;
 }
 
+.dash-section-head h2.dash-section-head-sm {
+  font-size: 15px;
+}
+
 .dash-recs-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -179,6 +195,12 @@
 
 @media (max-width: 700px) {
   .dash-recs-grid { grid-template-columns: 1fr; }
+}
+
+.skill-gap-tile-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .skill-gap-tile {

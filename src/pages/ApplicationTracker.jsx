@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios, { BASE_URL, authHeaders } from '../api'
 import { StudentLayout, SectionLabel, Card, StatusPill, BtnPrimary } from '../components/shared'
-import './ApplicationTracker.css'
+import '../css/ApplicationTracker.css'
 
 // Same stat groupings as the Dashboard's Application Activity tile
 // (spec section 28's "summary statistics": Total tracked, Applied,

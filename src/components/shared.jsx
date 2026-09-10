@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Modal } from 'react-bootstrap'
 import axios, { BASE_URL, authHeaders } from '../api'
 import { useAuth } from '../context/AuthContext'
-import './shared.css'
+import '../css/shared.css'
 
 // Turns a lookup table's rows ([{ id, name }, ...]) into a plain
 // { id: name } map, so cards/pages can resolve a foreign key id (e.g.
@@ -262,7 +262,7 @@ export function AdminSidebar() {
     <aside className="sidebar admin-sidebar">
       <div className="sidebar-header">
         <button onClick={() => navigate('/admin')} className="admin-sidebar-brand">
-          <span className="logo-mark" style={{ background: 'var(--teal)' }}>J</span>
+          <span className="logo-mark">J</span>
           Admin Panel
         </button>
       </div>
@@ -441,7 +441,7 @@ export function FilterSidebar({ filters, onChange, onApply, onClear }) {
         <div className="filter-group">
           <SectionLabel>Search</SectionLabel>
           <Input placeholder="Title..." value={filters.keyword} onChange={v => onChange('keyword', v)} onEnter={onApply} />
-          <p style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 4 }}>Press Enter or use Apply Filters below to search.</p>
+          <p className="filter-search-hint">Press Enter or use Apply Filters below to search.</p>
         </div>
         <Divider />
         <div className="filter-group">

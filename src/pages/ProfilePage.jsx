@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios, { BASE_URL, authHeaders } from '../api'
 import { StudentLayout, SectionLabel, Input } from '../components/shared'
-import './ProfilePage.css'
+import '../css/ProfilePage.css'
 
 const CHECK_ITEMS = [
   { key: 'headline', label: 'Professional headline', matchField: false },
@@ -133,7 +133,7 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <StudentLayout>
-        <div className="profile-wrap"><p style={{ color: 'var(--text-3)' }}>Loading...</p></div>
+        <div className="profile-wrap"><p className="profile-muted">Loading...</p></div>
       </StudentLayout>
     )
   }
@@ -191,7 +191,7 @@ export default function ProfilePage() {
               )
             })}
           </div>
-          <p className="completion-footnote"><span style={{ color: 'var(--teal)' }}>◎</span> These fields are used for internship matching</p>
+          <p className="completion-footnote"><span className="profile-teal-icon">◎</span> These fields are used for internship matching</p>
         </div>
 
         <Section id="basic" title="Basic Information" {...sectionProps}>
@@ -283,7 +283,7 @@ export default function ProfilePage() {
         </Section>
 
         <Section id="skills" title="Skills" matchField {...sectionProps}>
-          <p className="field-note" style={{ marginBottom: 12 }}>
+          <p className="field-note field-note-spaced">
             Select your skills from the predefined list. Skills are used for internship matching and shown to companies.
           </p>
           {skills.length > 0 && (
@@ -310,7 +310,7 @@ export default function ProfilePage() {
         </Section>
 
         <Section id="interests" title="Career Interests" matchField {...sectionProps}>
-          <p className="field-note" style={{ marginBottom: 12 }}>
+          <p className="field-note field-note-spaced">
             Select the fields you are interested in. Used for recommendations and matching.
           </p>
           <div className="tag-toggle-wrap">

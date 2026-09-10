@@ -3,6 +3,10 @@
   max-width: 680px;
 }
 
+.app-details-muted {
+  color: var(--text-3);
+}
+
 .app-details-back {
   background: none;
   border: none;

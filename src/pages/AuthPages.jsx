@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios, { BASE_URL } from '../api'
 import { useAuth } from '../context/AuthContext'
 import { Logo, BtnPrimary, Input, Divider } from '../components/shared'
-import './AuthPages.css'
+import '../css/AuthPages.css'
 
 function redirectPathFor(role) {
   if (role === 'company') return '/company/dashboard'
@@ -25,7 +25,12 @@ export function Login() {
       login(res.data.user)
       navigate(redirectPathFor(res.data.user.role))
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.')
+      console.error(err)
+      if (err.response) {
+        setError(err.response.data?.message || 'Something went wrong. Please try again.')
+      } else {
+        setError(`Could not reach the server at ${BASE_URL}. Make sure the backend is running.`)
+      }
     }
   }
 
@@ -81,13 +86,18 @@ function StudentForm({ onBack, onDone }) {
       })
       onDone(res.data.user)
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.')
+      console.error(err)
+      if (err.response) {
+        setError(err.response.data?.message || 'Something went wrong. Please try again.')
+      } else {
+        setError(`Could not reach the server at ${BASE_URL}. Make sure the backend is running.`)
+      }
     }
   }
 
   return (
     <div>
-      <h3 className="auth-title" style={{ fontSize: 18 }}>Create your student account</h3>
+      <h3 className="auth-title auth-title-sm">Create your student account</h3>
       {error && <p className="auth-error">{error}</p>}
       <div className="auth-row">
         <div className="auth-field">
@@ -130,13 +140,18 @@ function CompanyForm({ onBack, onDone }) {
       })
       onDone(res.data.user)
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.')
+      console.error(err)
+      if (err.response) {
+        setError(err.response.data?.message || 'Something went wrong. Please try again.')
+      } else {
+        setError(`Could not reach the server at ${BASE_URL}. Make sure the backend is running.`)
+      }
     }
   }
 
   return (
     <div>
-      <h3 className="auth-title" style={{ fontSize: 18 }}>Create your company account</h3>
+      <h3 className="auth-title auth-title-sm">Create your company account</h3>
       {error && <p className="auth-error">{error}</p>}
       <div className="auth-field">
         <label>Company Name</label>
@@ -159,10 +174,10 @@ function CompanyForm({ onBack, onDone }) {
 function RoleSelect({ onPick, onSwitchToLogin }) {
   return (
     <>
-      <h2 className="auth-title" style={{ textAlign: 'center', marginBottom: 8 }}>
+      <h2 className="auth-title auth-title-centered">
         What type of account are you creating?
       </h2>
-      <p style={{ textAlign: 'center', color: 'var(--text-3)', fontSize: 14, marginBottom: 24 }}>
+      <p className="auth-subtitle">
         Select the account type that fits your needs.
       </p>
       <div className="role-pick">

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import {
   Navbar, StudentLayout, InternshipCard, SectionLabel, Card, Badge, idNameMap,
 } from '../components/shared'
-import './CompanyProfile.css'
+import '../css/CompanyProfile.css'
 
 export default function CompanyProfile() {
   const { id } = useParams()
@@ -45,9 +45,9 @@ export default function CompanyProfile() {
 
   if (!company) {
     return (
-      <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+      <div className="page-shell">
         <Navbar />
-        <div className="company-wrap"><p style={{ color: 'var(--text-3)' }}>Loading...</p></div>
+        <div className="company-wrap"><p className="company-muted">Loading...</p></div>
       </div>
     )
   }
@@ -61,13 +61,13 @@ export default function CompanyProfile() {
       <div className="company-breadcrumb">
         <button onClick={() => navigate(isStudent ? '/find-internships' : '/browse')}>Companies</button>
         <span>/</span>
-        <span style={{ color: 'var(--text-1)' }}>{company.company_name}</span>
+        <span className="company-breadcrumb-current">{company.company_name}</span>
       </div>
 
       <Card className="p-4 mb-4">
         <div className="company-header-row">
           <div className="company-logo-lg">{initials}</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="company-header-info">
             <h1 className="company-name-title">{company.company_name}</h1>
             <div className="company-meta-row">
               {company.industry && <Badge label={company.industry} />}
@@ -87,7 +87,7 @@ export default function CompanyProfile() {
         {company.about && (
           <div className="company-about">
             <SectionLabel>About</SectionLabel>
-            <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-2)' }}>{company.about}</p>
+            <p className="company-about-text">{company.about}</p>
           </div>
         )}
       </Card>
@@ -96,7 +96,7 @@ export default function CompanyProfile() {
         <div className="company-opps-head">
           <div>
             <SectionLabel>Opportunities</SectionLabel>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-1)', fontFamily: 'var(--font-sans)' }}>
+            <h2 className="company-opps-heading">
               Active Internship Listings
             </h2>
           </div>
@@ -123,7 +123,7 @@ export default function CompanyProfile() {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+    <div className="page-shell">
       <Navbar />
       {content}
     </div>

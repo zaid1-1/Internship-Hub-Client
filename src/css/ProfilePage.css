@@ -139,6 +139,14 @@
   font-family: var(--font-mono);
 }
 
+.profile-muted {
+  color: var(--text-3);
+}
+
+.profile-teal-icon {
+  color: var(--teal);
+}
+
 .completion-footnote {
   font-size: 11px;
   color: var(--text-4);
@@ -240,6 +248,10 @@
   font-size: 11px;
   color: var(--text-4);
   margin-top: 4px;
+}
+
+.field-note-spaced {
+  margin-bottom: 12px;
 }
 
 .tag-toggle-wrap {

@@ -5,7 +5,7 @@ import {
   StudentLayout, SectionLabel, Card, ProgressBar, BtnOutline, BtnGhost,
   InternshipCard, idNameMap,
 } from '../components/shared'
-import './StudentDashboard.css'
+import '../css/StudentDashboard.css'
 
 function greeting() {
   const h = new Date().getHours()
@@ -91,7 +91,7 @@ export default function StudentDashboard() {
   if (!profile) {
     return (
       <StudentLayout>
-        <div className="dash-wrap"><p style={{ color: 'var(--text-3)' }}>Loading...</p></div>
+        <div className="dash-wrap"><p className="dash-muted">Loading...</p></div>
       </StudentLayout>
     )
   }
@@ -147,12 +147,12 @@ export default function StudentDashboard() {
             <div className="completion-items">
               {missing.slice(0, 3).map(label => (
                 <div key={label} className="completion-item">
-                  <span style={{ color: 'var(--teal)' }}>○</span>
+                  <span className="dash-teal-icon">○</span>
                   <span>{label}</span>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 14 }}>
+            <div className="dash-btn-spacer">
               <BtnOutline onClick={() => navigate('/profile')}>Complete Profile</BtnOutline>
             </div>
           </Card>
@@ -172,7 +172,7 @@ export default function StudentDashboard() {
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 14 }}>
+            <div className="dash-btn-spacer">
               <BtnGhost onClick={() => navigate('/applications')}>View All Applications →</BtnGhost>
             </div>
           </Card>
@@ -225,12 +225,12 @@ export default function StudentDashboard() {
           <div className="dash-section-head">
             <div>
               <SectionLabel>Skill Gaps</SectionLabel>
-              <h2 style={{ fontSize: 15 }}>Skills employers are asking for</h2>
+              <h2 className="dash-section-head-sm">Skills employers are asking for</h2>
             </div>
             <BtnGhost onClick={() => navigate('/skill-gaps')}>View Skill Gaps →</BtnGhost>
           </div>
           {topSkillGaps.length > 0 ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div className="skill-gap-tile-row">
               {topSkillGaps.map(s => (
                 <div key={s.name} className="skill-gap-tile">
                   <p className="skill-gap-tile-name">{s.name}</p>
