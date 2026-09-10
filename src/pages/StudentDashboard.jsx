@@ -51,6 +51,7 @@ export default function StudentDashboard() {
   const [interests, setInterests] = useState([])
   const [applications, setApplications] = useState([])
   const [recommendations, setRecommendations] = useState([])
+  const [savedIds, setSavedIds] = useState([])
   const [lookups, setLookups] = useState({ locations: {}, workArrangements: {}, internshipTypes: {} })
 
   useEffect(() => {
@@ -66,6 +67,14 @@ export default function StudentDashboard() {
 
     axios.get(`${BASE_URL}/api/students/me/recommendations`, { headers: authHeaders() }).then(res => {
       setRecommendations(res.data)
+    }).catch(err => console.error(err))
+
+    // Without this, InternshipCard's Save button always starts unsaved
+    // here (it defaults savedIds to []), even for internships already
+    // saved from another page - clicking it then re-POSTs an already-
+    // saved internship_id and the button silently fails to update.
+    axios.get(`${BASE_URL}/api/saved`, { headers: authHeaders() }).then(res => {
+      setSavedIds(res.data.map(i => i.id))
     }).catch(err => console.error(err))
 
     axios.get(`${BASE_URL}/api/locations`).then(res => {
@@ -204,7 +213,7 @@ export default function StudentDashboard() {
           {topRecommendations.length > 0 ? (
             <div className="dash-recs-grid">
               {topRecommendations.map(i => (
-                <InternshipCard key={i.id} internship={i} lookups={lookups} matchScore={i.match_score} />
+                <InternshipCard key={i.id} internship={i} lookups={lookups} savedIds={savedIds} matchScore={i.match_score} />
               ))}
             </div>
           ) : (

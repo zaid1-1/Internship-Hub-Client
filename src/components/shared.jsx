@@ -106,8 +106,17 @@ export function BtnGhost({ children, onClick }) {
   return <button onClick={onClick} className="btn-ghost">{children}</button>
 }
 
-export function Input({ placeholder, type = 'text', value, onChange }) {
-  return <input type={type} placeholder={placeholder} value={value} onChange={e => onChange?.(e.target.value)} className="form-input" />
+export function Input({ placeholder, type = 'text', value, onChange, onEnter }) {
+  return (
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={e => onChange?.(e.target.value)}
+      onKeyDown={e => { if (e.key === 'Enter') onEnter?.() }}
+      className="form-input"
+    />
+  )
 }
 
 export function Select({ options, value, onChange, placeholder }) {
@@ -323,7 +332,10 @@ export function AuthModal({ show, onClose, action }) {
 // lookup table's GET response. `savedIds` (optional) is the logged-in
 // student's own saved internship ids, from GET /api/saved, so the Save
 // button reflects real state instead of always starting unsaved.
-export function InternshipCard({ internship, lookups, savedIds = [], matchScore }) {
+// `onSaveChange` (optional) fires (internshipId, nowSaved) right after a
+// save/unsave call succeeds - the Saved page uses it to drop a card from
+// its own list as soon as it's unsaved, instead of waiting on a refetch.
+export function InternshipCard({ internship, lookups, savedIds = [], matchScore, onSaveChange }) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const isStudent = user?.role === 'student'
@@ -347,9 +359,11 @@ export function InternshipCard({ internship, lookups, savedIds = [], matchScore 
       if (saved) {
         await axios.delete(`${BASE_URL}/api/saved/${internship.id}`, { headers: authHeaders() })
         setSaved(false)
+        onSaveChange?.(internship.id, false)
       } else {
         await axios.post(`${BASE_URL}/api/saved`, { internship_id: internship.id }, { headers: authHeaders() })
         setSaved(true)
+        onSaveChange?.(internship.id, true)
       }
     } catch (err) {
       console.error(err)
@@ -426,7 +440,8 @@ export function FilterSidebar({ filters, onChange, onApply, onClear }) {
 
         <div className="filter-group">
           <SectionLabel>Search</SectionLabel>
-          <Input placeholder="Title..." value={filters.keyword} onChange={v => onChange('keyword', v)} />
+          <Input placeholder="Title..." value={filters.keyword} onChange={v => onChange('keyword', v)} onEnter={onApply} />
+          <p style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 4 }}>Press Enter or use Apply Filters below to search.</p>
         </div>
         <Divider />
         <div className="filter-group">

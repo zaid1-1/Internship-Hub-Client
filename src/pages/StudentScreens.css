@@ -1,0 +1,103 @@
+.discover-wrap {
+  padding: 32px;
+  max-width: 1120px;
+}
+
+.discover-header {
+  margin-bottom: 20px;
+}
+
+.discover-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 4px 0 0;
+}
+
+.discover-header p {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 4px 0 0;
+}
+
+.discover-body {
+  display: flex;
+  gap: 20px;
+}
+
+.discover-results {
+  flex: 1;
+  min-width: 0;
+}
+
+.discover-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.discover-count {
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.discover-count strong {
+  font-family: var(--font-mono);
+  color: var(--text-1);
+}
+
+.discover-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.discover-sort span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.discover-sort select {
+  width: auto;
+}
+
+.discover-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.discover-cards-full {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 800px) {
+  .discover-body { flex-direction: column; }
+  .discover-cards-full { grid-template-columns: 1fr; }
+}
+
+.discover-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-3);
+  font-size: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}

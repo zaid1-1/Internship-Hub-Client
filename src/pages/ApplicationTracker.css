@@ -1,0 +1,133 @@
+.tracker-wrap {
+  padding: 32px;
+  max-width: 1024px;
+}
+
+.tracker-header {
+  margin-bottom: 24px;
+}
+
+.tracker-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 4px 0 0;
+}
+
+.tracker-header p {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 4px 0 0;
+  max-width: 620px;
+}
+
+.tracker-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 800px) {
+  .tracker-stat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.tracker-stat-tile {
+  padding: 12px;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  border-left: 4px solid transparent;
+}
+
+.tracker-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin: 0;
+}
+
+.tracker-stat-label {
+  font-size: 11px;
+  margin: 2px 0 0;
+}
+
+.tracker-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.tracker-tab {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-3);
+  font-family: var(--font-sans);
+}
+
+.tracker-tab.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+.tracker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tracker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+
+.tracker-row-main {
+  min-width: 160px;
+}
+
+.tracker-row-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+.tracker-row-company {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 2px 0 0;
+}
+
+.tracker-row-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
+.tracker-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-3);
+  font-size: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}

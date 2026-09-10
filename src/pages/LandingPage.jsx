@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios, { BASE_URL } from '../api'
+import axios, { BASE_URL, authHeaders } from '../api'
+import { useAuth } from '../context/AuthContext'
 import {
   Navbar, InternshipCard, BtnPrimary, BtnOutline, SectionLabel, idNameMap,
 } from '../components/shared'
@@ -40,6 +41,8 @@ const howItWorks = [
 
 export default function LandingPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const isStudent = user?.role === 'student'
   const [keyword, setKeyword] = useState('')
   const [fieldId, setFieldId] = useState('')
   const [locationId, setLocationId] = useState('')
@@ -47,6 +50,7 @@ export default function LandingPage() {
   const [fields, setFields] = useState([])
   const [locations, setLocations] = useState([])
   const [featured, setFeatured] = useState([])
+  const [savedIds, setSavedIds] = useState([])
   const [lookups, setLookups] = useState({ locations: {}, workArrangements: {}, internshipTypes: {} })
 
   useEffect(() => {
@@ -62,6 +66,16 @@ export default function LandingPage() {
       setLookups(prev => ({ ...prev, internshipTypes: idNameMap(res.data) }))
     })
     axios.get(`${BASE_URL}/api/internships`).then(res => setFeatured(res.data.slice(0, 3)))
+
+    // Same reason as every other InternshipCard-rendering page: without
+    // this, a logged-in student's Save button here always starts
+    // unsaved, even for internships they already saved elsewhere.
+    if (isStudent) {
+      axios.get(`${BASE_URL}/api/saved`, { headers: authHeaders() }).then(res => {
+        setSavedIds(res.data.map(i => i.id))
+      }).catch(err => console.error(err))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSearch = () => {
@@ -97,6 +111,7 @@ export default function LandingPage() {
                   placeholder="Search internships..."
                   value={keyword}
                   onChange={e => setKeyword(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleSearch() }}
                 />
                 <select className="form-select" value={fieldId} onChange={e => setFieldId(e.target.value)}>
                   <option value="">All fields</option>
@@ -160,7 +175,7 @@ export default function LandingPage() {
           {featured.length > 0 ? (
             <div className="featured-grid">
               {featured.map(i => (
-                <InternshipCard key={i.id} internship={i} lookups={lookups} />
+                <InternshipCard key={i.id} internship={i} lookups={lookups} savedIds={savedIds} />
               ))}
             </div>
           ) : (
