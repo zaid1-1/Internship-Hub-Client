@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
+import { Modal } from 'react-bootstrap'
 import axios, { BASE_URL, authHeaders } from '../api'
-import { StudentLayout, SectionLabel, Input } from '../components/shared'
+import { StudentLayout, SectionLabel, Input, BtnPrimary, BtnOutline, ActionBtn } from '../components/shared'
 import '../css/ProfilePage.css'
 
 const CHECK_ITEMS = [
@@ -14,6 +15,77 @@ const CHECK_ITEMS = [
   { key: 'preferred_duration', label: 'Preferred duration', matchField: true },
   { key: 'github_url', label: 'Professional link', matchField: false },
 ]
+
+// Fields for each of the three professional sub-resources - the labels/
+// placeholders/input types shown in the add/edit form. Keys match exactly
+// what the backend's subResourceRouter.js factory expects for that table
+// (see routes/projects.js, experience.js, certifications.js), so the form
+// state can be POSTed/PUT straight through with no reshaping.
+const PROJECT_FIELDS = [
+  { key: 'name', label: 'Project Name' },
+  { key: 'description', label: 'Description', type: 'textarea' },
+  { key: 'technologies', label: 'Technologies', placeholder: 'React, Node.js, PostgreSQL' },
+  { key: 'github_url', label: 'GitHub URL', placeholder: 'github.com/you/project' },
+  { key: 'demo_url', label: 'Live Demo URL (optional)', placeholder: 'yourproject.com' },
+]
+
+const EXPERIENCE_FIELDS = [
+  { key: 'title', label: 'Position / Title' },
+  { key: 'organization', label: 'Organization' },
+  { key: 'start_date', label: 'Start Date', type: 'date' },
+  { key: 'end_date', label: 'End Date (leave blank if current)', type: 'date' },
+  { key: 'description', label: 'Description', type: 'textarea' },
+]
+
+const CERTIFICATION_FIELDS = [
+  { key: 'name', label: 'Certification Name' },
+  { key: 'issuing_organization', label: 'Issuing Organization' },
+  { key: 'date', label: 'Date', type: 'date' },
+  { key: 'credential_id', label: 'Credential ID (optional)' },
+  { key: 'credential_url', label: 'Credential URL (optional)' },
+]
+
+function renderProjectItem(p) {
+  return (
+    <>
+      <p className="subresource-item-title">{p.name}</p>
+      {p.technologies && <p className="subresource-item-subtitle">{p.technologies}</p>}
+      {p.description && <p className="subresource-item-desc">{p.description}</p>}
+      {(p.github_url || p.demo_url) && (
+        <div className="subresource-item-links">
+          {p.github_url && <a href={p.github_url} target="_blank" rel="noopener noreferrer">GitHub</a>}
+          {p.demo_url && <a href={p.demo_url} target="_blank" rel="noopener noreferrer">Live Demo</a>}
+        </div>
+      )}
+    </>
+  )
+}
+
+function renderExperienceItem(e) {
+  const range = [e.start_date, e.end_date].filter(Boolean).join(' – ')
+  return (
+    <>
+      <p className="subresource-item-title">{e.title}</p>
+      <p className="subresource-item-subtitle">{e.organization}{range && ` · ${range}`}</p>
+      {e.description && <p className="subresource-item-desc">{e.description}</p>}
+    </>
+  )
+}
+
+function renderCertificationItem(c) {
+  return (
+    <>
+      <p className="subresource-item-title">{c.name}</p>
+      <p className="subresource-item-subtitle">{c.issuing_organization}{c.date && ` · ${c.date}`}</p>
+      {c.credential_id && <p className="subresource-item-desc">Credential ID: {c.credential_id}</p>}
+      {c.credential_url && (
+        <div className="subresource-item-links">
+          <a href={c.credential_url} target="_blank" rel="noopener noreferrer">View Credential</a>
+        </div>
+      )}
+    </>
+  )
+}
 
 function isItemDone(item, profile, skills, interests) {
   if (item.key === 'skills') return skills.length > 0
@@ -40,6 +112,148 @@ function Section({ id, title, matchField, openSection, setOpenSection, children 
   )
 }
 
+// Generic add/edit/delete panel for the student's professional
+// sub-resources (projects, experience, certifications). All three share
+// the exact same CRUD shape on the backend (subResourceRouter.js's
+// factory), so this is the frontend's equivalent - one component, driven
+// by `apiPath` + `fields`, instead of three near-identical ones. Fetches
+// its own list on mount (same self-contained pattern already used by
+// FilterSidebar in shared.jsx), and sends full-body POST/PUT with
+// exactly the keys `fields` declares, matching the backend's
+// `fields.map(f => req.body[f])` expectations.
+function SubResourceList({ apiPath, fields, renderItem, addLabel, emptyLabel }) {
+  const [items, setItems] = useState([])
+  const [loaded, setLoaded] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [form, setForm] = useState({})
+  const [formError, setFormError] = useState('')
+  const [confirmingId, setConfirmingId] = useState(null)
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}${apiPath}`, { headers: authHeaders() }).then(res => {
+      setItems(res.data)
+      setLoaded(true)
+    }).catch(err => { console.error(err); setLoaded(true) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const setFormField = (key, value) => setForm(prev => ({ ...prev, [key]: value }))
+
+  const openAdd = () => {
+    const blank = {}
+    fields.forEach(f => { blank[f.key] = '' })
+    setForm(blank)
+    setEditingId(null)
+    setFormError('')
+    setShowModal(true)
+  }
+
+  const openEdit = (item) => {
+    const values = {}
+    fields.forEach(f => { values[f.key] = item[f.key] || '' })
+    setForm(values)
+    setEditingId(item.id)
+    setFormError('')
+    setShowModal(true)
+  }
+
+  const handleSubmit = async () => {
+    setFormError('')
+    try {
+      if (editingId) {
+        const res = await axios.put(`${BASE_URL}${apiPath}/${editingId}`, form, { headers: authHeaders() })
+        setItems(prev => prev.map(i => (i.id === editingId ? res.data : i)))
+      } else {
+        const res = await axios.post(`${BASE_URL}${apiPath}`, form, { headers: authHeaders() })
+        setItems(prev => [...prev, res.data])
+      }
+      setShowModal(false)
+    } catch (err) {
+      console.error(err)
+      if (err.response) {
+        setFormError(err.response.data?.message || err.response.data?.error || 'Something went wrong. Please try again.')
+      } else {
+        setFormError(`Could not reach the server at ${BASE_URL}. Make sure the backend is running.`)
+      }
+    }
+  }
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${BASE_URL}${apiPath}/${id}`, { headers: authHeaders() })
+      setItems(prev => prev.filter(i => i.id !== id))
+      setConfirmingId(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  return (
+    <div>
+      {loaded && items.length === 0 && <p className="placeholder-note">{emptyLabel}</p>}
+
+      {items.length > 0 && (
+        <div className="subresource-list">
+          {items.map(item => (
+            <div key={item.id} className="subresource-item">
+              <div className="subresource-item-body">{renderItem(item)}</div>
+              {confirmingId === item.id ? (
+                <div className="subresource-confirm-row">
+                  <span>Delete this entry?</span>
+                  <ActionBtn label="Yes, Delete" danger onClick={() => handleDelete(item.id)} />
+                  <ActionBtn label="Cancel" onClick={() => setConfirmingId(null)} />
+                </div>
+              ) : (
+                <div className="subresource-item-actions">
+                  <ActionBtn label="Edit" onClick={() => openEdit(item)} />
+                  <ActionBtn label="Delete" danger onClick={() => setConfirmingId(item.id)} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="subresource-add-row">
+        <BtnOutline onClick={openAdd}>{addLabel}</BtnOutline>
+      </div>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Body className="p-4">
+          <h2 className="auth-modal-title">{editingId ? 'Edit Entry' : addLabel}</h2>
+          {fields.map(f => (
+            <div key={f.key} className="field-block">
+              <label className="field-label">{f.label}</label>
+              {f.type === 'textarea' ? (
+                <textarea
+                  rows={3}
+                  className="field-textarea"
+                  value={form[f.key] || ''}
+                  onChange={e => setFormField(f.key, e.target.value)}
+                />
+              ) : (
+                <input
+                  type={f.type || 'text'}
+                  className="form-input"
+                  placeholder={f.placeholder || ''}
+                  value={form[f.key] || ''}
+                  onChange={e => setFormField(f.key, e.target.value)}
+                />
+              )}
+            </div>
+          ))}
+          {formError && <p className="profile-save-error">{formError}</p>}
+          <div className="d-flex flex-column gap-2">
+            <BtnPrimary full onClick={handleSubmit}>Save</BtnPrimary>
+            <button onClick={() => setShowModal(false)} className="btn-ghost">Cancel</button>
+          </div>
+        </Modal.Body>
+      </Modal>
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null)
   const [skills, setSkills] = useState([])
@@ -55,6 +269,10 @@ export default function ProfilePage() {
   const [openSection, setOpenSection] = useState('education')
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoError, setPhotoError] = useState('')
+  const [cvUploading, setCvUploading] = useState(false)
+  const [cvError, setCvError] = useState('')
 
   function loadProfile() {
     axios.get(`${BASE_URL}/api/students/me`, { headers: authHeaders() }).then(res => {
@@ -108,6 +326,49 @@ export default function ProfilePage() {
     }
   }
 
+  // POST /api/students/me/photo and /me/cv both take a multipart file
+  // upload and immediately return the updated student_profiles row -
+  // setProfile(res.data) below keeps local state in sync the same way
+  // handleSave already does for the full-body PUT, so no separate "Save"
+  // click is needed for either upload.
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setPhotoError('')
+    setPhotoUploading(true)
+    const formData = new FormData()
+    formData.append('photo', file)
+    try {
+      const res = await axios.post(`${BASE_URL}/api/students/me/photo`, formData, { headers: authHeaders() })
+      setProfile(res.data)
+    } catch (err) {
+      console.error(err)
+      setPhotoError('Could not upload photo. Please try again.')
+    } finally {
+      setPhotoUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  const handleCvUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setCvError('')
+    setCvUploading(true)
+    const formData = new FormData()
+    formData.append('cv', file)
+    try {
+      const res = await axios.post(`${BASE_URL}/api/students/me/cv`, formData, { headers: authHeaders() })
+      setProfile(res.data)
+    } catch (err) {
+      console.error(err)
+      setCvError('Could not upload CV. Please try again.')
+    } finally {
+      setCvUploading(false)
+      e.target.value = ''
+    }
+  }
+
   const handleSave = async () => {
     setSaveError('')
     try {
@@ -157,7 +418,13 @@ export default function ProfilePage() {
         </div>
 
         <div className="profile-header-card">
-          <div className="profile-avatar">{initials || '?'}</div>
+          <div className="profile-avatar">
+            {profile.photo_url ? (
+              <img src={`${BASE_URL}${profile.photo_url}`} alt="" className="profile-avatar-img" />
+            ) : (
+              initials || '?'
+            )}
+          </div>
           <div className="profile-header-info">
             <div>
               <h2 className="profile-name">{profile.first_name} {profile.last_name}</h2>
@@ -195,6 +462,24 @@ export default function ProfilePage() {
         </div>
 
         <Section id="basic" title="Basic Information" {...sectionProps}>
+          <div className="field-block">
+            <label className="field-label">Profile Photo</label>
+            <div className="upload-row">
+              {profile.photo_url ? (
+                <img src={`${BASE_URL}${profile.photo_url}`} alt="" className="upload-avatar-preview" />
+              ) : (
+                <div className="upload-avatar-placeholder">{initials || '?'}</div>
+              )}
+              <div>
+                <input type="file" accept="image/*" id="photo-upload-input" className="upload-file-input" onChange={handlePhotoUpload} />
+                <label htmlFor="photo-upload-input" className="btn-navy-outline upload-file-label">
+                  {photoUploading ? 'Uploading...' : 'Upload Photo'}
+                </label>
+                <p className="field-note">JPG or PNG. Not mandatory.</p>
+              </div>
+            </div>
+            {photoError && <p className="profile-save-error">{photoError}</p>}
+          </div>
           <div className="field-grid">
             <div className="field-block">
               <label className="field-label">Phone</label>
@@ -363,25 +648,52 @@ export default function ProfilePage() {
         </Section>
 
         <Section id="projects" title="Projects" {...sectionProps}>
-          <p className="placeholder-note">Projects are coming in a later batch.</p>
+          <p className="field-note field-note-spaced">Showcase projects you've built. Visible to companies on your candidate profile.</p>
+          <SubResourceList
+            apiPath="/api/projects"
+            fields={PROJECT_FIELDS}
+            renderItem={renderProjectItem}
+            addLabel="Add Project"
+            emptyLabel="No projects added yet."
+          />
         </Section>
 
         <Section id="experience" title="Experience" {...sectionProps}>
-          <p className="placeholder-note">Experience is coming in a later batch.</p>
+          <p className="field-note field-note-spaced">Internships, part-time jobs, volunteer work, or freelance work. Optional.</p>
+          <SubResourceList
+            apiPath="/api/experience"
+            fields={EXPERIENCE_FIELDS}
+            renderItem={renderExperienceItem}
+            addLabel="Add Experience"
+            emptyLabel="No experience added yet."
+          />
         </Section>
 
         <Section id="certifications" title="Certifications" {...sectionProps}>
-          <p className="placeholder-note">Certifications are coming in a later batch.</p>
+          <p className="field-note field-note-spaced">Certifications you've earned. Optional.</p>
+          <SubResourceList
+            apiPath="/api/certifications"
+            fields={CERTIFICATION_FIELDS}
+            renderItem={renderCertificationItem}
+            addLabel="Add Certification"
+            emptyLabel="No certifications added yet."
+          />
         </Section>
 
         <Section id="cv" title="CV / Resume" {...sectionProps}>
-          {profile.cv_url ? (
-            <p className="field-note">
-              <a href={`${BASE_URL}${profile.cv_url}`} target="_blank" rel="noopener noreferrer">View current CV</a>
-            </p>
-          ) : (
-            <p className="placeholder-note">CV upload is coming in a later batch.</p>
-          )}
+          <div className="field-block">
+            {profile.cv_url && (
+              <p className="field-note field-note-spaced">
+                <a href={`${BASE_URL}${profile.cv_url}`} target="_blank" rel="noopener noreferrer">View current CV</a>
+              </p>
+            )}
+            <input type="file" accept=".pdf,.doc,.docx" id="cv-upload-input" className="upload-file-input" onChange={handleCvUpload} />
+            <label htmlFor="cv-upload-input" className="btn-navy-outline upload-file-label">
+              {cvUploading ? 'Uploading...' : profile.cv_url ? 'Replace CV' : 'Upload CV'}
+            </label>
+            <p className="field-note">PDF or Word document. Companies can view/download this from your candidate profile.</p>
+            {cvError && <p className="profile-save-error">{cvError}</p>}
+          </div>
         </Section>
 
         <Section id="links" title="Professional Links" {...sectionProps}>
