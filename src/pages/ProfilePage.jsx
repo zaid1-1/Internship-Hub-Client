@@ -54,6 +54,7 @@ export default function ProfilePage() {
   const [skillSearch, setSkillSearch] = useState('')
   const [openSection, setOpenSection] = useState('education')
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   function loadProfile() {
     axios.get(`${BASE_URL}/api/students/me`, { headers: authHeaders() }).then(res => {
@@ -108,16 +109,24 @@ export default function ProfilePage() {
   }
 
   const handleSave = async () => {
+    setSaveError('')
     try {
-      await axios.put(`${BASE_URL}/api/students/me`, profile, { headers: authHeaders() })
+      const res = await axios.put(`${BASE_URL}/api/students/me`, profile, { headers: authHeaders() })
+      setProfile(res.data)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (err) {
       console.error(err)
+      if (err.response) {
+        setSaveError(err.response.data?.message || err.response.data?.error || 'Something went wrong. Please try again.')
+      } else {
+        setSaveError(`Could not reach the server at ${BASE_URL}. Make sure the backend is running.`)
+      }
     }
   }
 
   const handleDiscard = () => {
+    setSaveError('')
     loadProfile()
   }
 
@@ -394,6 +403,7 @@ export default function ProfilePage() {
           </div>
         </Section>
 
+        {saveError && <p className="profile-save-error">{saveError}</p>}
         <div className="profile-save-row">
           <button className={`profile-save-btn ${saved ? 'saved' : ''}`} onClick={handleSave}>
             {saved ? 'Changes Saved ✓' : 'Save Changes'}

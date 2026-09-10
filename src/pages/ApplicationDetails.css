@@ -1,0 +1,153 @@
+.app-details-wrap {
+  padding: 32px;
+  max-width: 680px;
+}
+
+.app-details-back {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  padding: 0;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.app-details-back:hover {
+  color: var(--text-1);
+}
+
+.app-details-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.app-details-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 4px 0 0;
+}
+
+.app-details-company {
+  font-size: 14px;
+  color: var(--text-3);
+  margin: 2px 0 0;
+}
+
+.app-details-meta {
+  font-size: 12px;
+  color: var(--text-4);
+  margin: 4px 0 0;
+}
+
+.app-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.app-details-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-4);
+  margin: 0 0 4px;
+}
+
+.app-details-value {
+  font-size: 14px;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  margin: 0;
+}
+
+.app-details-external-link {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  text-decoration: none;
+}
+
+.app-details-external-link:hover {
+  text-decoration: underline;
+}
+
+.field-block {
+  margin-bottom: 14px;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.field-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  resize: vertical;
+  color: var(--text-1);
+}
+
+.field-textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+.app-details-error {
+  font-size: 12px;
+  color: #dc2626;
+  margin: 0 0 8px;
+}
+
+.app-details-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.app-details-save-btn {
+  align-self: flex-start;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--navy);
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-sans);
+}
+
+.app-details-save-btn.saved {
+  background: var(--teal);
+}
+
+.app-details-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-2);
+  flex-wrap: wrap;
+}
