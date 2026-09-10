@@ -1,0 +1,88 @@
+.cand-wrap {
+  padding: 32px;
+  max-width: 800px;
+}
+
+.cand-back {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-3);
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+}
+
+.cand-header {
+  margin-bottom: 20px;
+}
+
+.cand-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 2px 0 4px;
+}
+
+.cand-header p {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.cand-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cand-card {
+  min-width: 0;
+}
+
+.cand-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cand-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+.cand-card-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 2px 0 0;
+}
+
+.cand-card-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.cand-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.cand-empty {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+  text-align: center;
+}
