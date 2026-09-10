@@ -4,7 +4,7 @@ import axios, { BASE_URL, authHeaders } from '../api'
 import {
   StudentLayout, SectionLabel, FilterSidebar, InternshipCard, BtnPrimary, idNameMap,
 } from '../components/shared'
-import './StudentScreens.css'
+import '../css/StudentScreens.css'
 
 // ── Find Internships ────────────────────────────────────────────
 // Same filtered listing as the public Browse page (same endpoint, same

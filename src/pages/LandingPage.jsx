@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import {
   Navbar, InternshipCard, BtnPrimary, BtnOutline, SectionLabel, idNameMap,
 } from '../components/shared'
-import './LandingPage.css'
+import '../css/LandingPage.css'
 
 const stats = [
   { label: 'Opportunities', value: '340+', accent: 'var(--navy)' },
@@ -162,11 +162,11 @@ export default function LandingPage() {
       </section>
 
       <section className="featured-section">
-        <div className="section-wrap" style={{ padding: '0 24px' }}>
+        <div className="section-wrap section-wrap-flush">
           <div className="featured-head">
             <div>
               <SectionLabel>Featured Opportunities</SectionLabel>
-              <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-1)', fontFamily: 'var(--font-sans)' }}>
+              <h2 className="featured-heading">
                 Recently Added Internships
               </h2>
             </div>
@@ -179,7 +179,7 @@ export default function LandingPage() {
               ))}
             </div>
           ) : (
-            <p style={{ color: 'var(--text-3)', fontSize: 14 }}>No internships posted yet — check back soon.</p>
+            <p className="featured-empty">No internships posted yet — check back soon.</p>
           )}
         </div>
       </section>

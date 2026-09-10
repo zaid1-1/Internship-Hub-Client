@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import {
   Navbar, FilterSidebar, InternshipCard, SectionLabel, idNameMap,
 } from '../components/shared'
-import './BrowsePage.css'
+import '../css/BrowsePage.css'
 
 export default function BrowsePage() {
   const navigate = useNavigate()
@@ -89,7 +89,7 @@ export default function BrowsePage() {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+    <div className="page-shell">
       <Navbar />
       <div className="browse-wrap">
         <div className="browse-header">

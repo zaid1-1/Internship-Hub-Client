@@ -4,7 +4,7 @@ import axios, { BASE_URL, authHeaders } from '../api'
 import {
   StudentLayout, SectionLabel, Card, StatusPill, BtnPrimary, BtnOutline, Divider, idNameMap,
 } from '../components/shared'
-import './ApplicationDetails.css'
+import '../css/ApplicationDetails.css'
 
 const statusOptions = ['Clicked Apply', 'Applied', 'Interview', 'Offer', 'Rejected', 'Ghosted', 'Withdrawn']
 
@@ -90,7 +90,7 @@ export default function ApplicationDetails() {
     return (
       <StudentLayout>
         <div className="app-details-wrap">
-          <p style={{ color: 'var(--text-3)' }}>That tracked application couldn't be found.</p>
+          <p className="app-details-muted">That tracked application couldn't be found.</p>
           <BtnOutline onClick={() => navigate('/applications')}>Back to Applications</BtnOutline>
         </div>
       </StudentLayout>
@@ -100,7 +100,7 @@ export default function ApplicationDetails() {
   if (!application) {
     return (
       <StudentLayout>
-        <div className="app-details-wrap"><p style={{ color: 'var(--text-3)' }}>Loading...</p></div>
+        <div className="app-details-wrap"><p className="app-details-muted">Loading...</p></div>
       </StudentLayout>
     )
   }

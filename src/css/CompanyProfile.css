@@ -1,7 +1,16 @@
+.page-shell {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
 .company-wrap {
   max-width: 860px;
   margin: 0 auto;
   padding: 32px 24px;
+}
+
+.company-muted {
+  color: var(--text-3);
 }
 
 .company-breadcrumb {
@@ -29,6 +38,10 @@
   color: var(--text-4);
 }
 
+.company-breadcrumb-current {
+  color: var(--text-1);
+}
+
 .company-header-row {
   display: flex;
   gap: 20px;
@@ -49,6 +62,11 @@
   border-radius: var(--radius);
   border: 1px solid var(--border);
   font-family: var(--font-sans);
+}
+
+.company-header-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .company-name-title {
@@ -77,6 +95,12 @@
   border-top: 1px solid var(--border);
 }
 
+.company-about-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-2);
+}
+
 .company-opps-head {
   display: flex;
   align-items: center;
@@ -84,6 +108,13 @@
   margin-bottom: 16px;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.company-opps-heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
 }
 
 .company-opps-count {

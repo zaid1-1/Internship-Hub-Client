@@ -65,6 +65,7 @@
 .admin-sidebar { background: var(--navy-dark) !important; border-right: none !important; }
 .admin-sidebar .sidebar-header { border-bottom: 1px solid rgba(255,255,255,.08); }
 .admin-sidebar-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #fff; background: none; border: none; font-family: var(--font-sans); }
+.admin-sidebar .logo-mark { background: var(--teal); }
 .admin-sidebar .sidebar-link { color: rgba(255,255,255,.55); }
 .admin-sidebar .sidebar-link:hover { background: rgba(255,255,255,.06); color: #fff; }
 .admin-sidebar .sidebar-link.active { background: rgba(255,255,255,.1); color: #fff; font-weight: 600; }
@@ -110,3 +111,4 @@
 .filter-clear-btn { background: none; border: none; font-size: 12px; font-weight: 600; color: var(--teal); cursor: pointer; padding: 0; }
 .filter-clear-btn:hover { opacity: .75; }
 .filter-group { margin-bottom: 16px; }
+.filter-search-hint { font-size: 11px; color: var(--text-4); margin-top: 4px; }

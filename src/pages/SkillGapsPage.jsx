@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios, { BASE_URL, authHeaders } from '../api'
 import { StudentLayout, SectionLabel, Card, SkillTag, BtnPrimary, BtnOutline } from '../components/shared'
-import './SkillGapsPage.css'
+import '../css/SkillGapsPage.css'
 
 // Spec section 34: compare the student's own skills against required
 // skills across relevant opportunities and surface what's missing.
@@ -83,7 +83,7 @@ export default function SkillGapsPage() {
               You're not missing any required skills across your current recommendations. Nice work.
             </p>
           ) : (
-            <p style={{ color: 'var(--text-3)' }}>Loading...</p>
+            <p className="gaps-muted">Loading...</p>
           )}
         </Card>
 
@@ -95,7 +95,7 @@ export default function SkillGapsPage() {
         {loaded && opportunitiesWithGaps.length > 0 ? (
           <div className="gaps-opps">
             {opportunitiesWithGaps.map(o => (
-              <Card key={o.id} className="gaps-opp-card clickable" onClick={() => navigate(`/internships/${o.id}`)}>
+              <Card key={o.id} className="gaps-opp-card" onClick={() => navigate(`/internships/${o.id}`)}>
                 <div className="gaps-opp-top">
                   <div>
                     <p className="gaps-opp-title">{o.title}</p>
