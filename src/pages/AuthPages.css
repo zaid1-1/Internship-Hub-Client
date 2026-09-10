@@ -1,0 +1,161 @@
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  background: var(--bg);
+}
+
+.auth-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.auth-tagline {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-3);
+  margin: 0 0 28px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 32px;
+}
+
+.auth-card.wide {
+  max-width: 440px;
+}
+
+.auth-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 24px;
+}
+
+.auth-field {
+  margin-bottom: 16px;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  margin-bottom: 6px;
+  font-family: var(--font-sans);
+}
+
+.auth-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.auth-error {
+  color: var(--s-rejected-text);
+  background: var(--s-rejected-bg);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-3);
+  margin-top: 16px;
+}
+
+.auth-switch button {
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.auth-switch button:hover {
+  text-decoration: underline;
+}
+
+.role-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.role-card {
+  text-align: left;
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border-dark);
+  background: transparent;
+}
+
+.role-card:hover {
+  border-color: var(--navy);
+}
+
+.role-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+}
+
+.role-card-desc {
+  font-size: 14px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.role-card-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.role-card-icon.student {
+  color: var(--navy);
+}
+
+.role-card-icon.company {
+  color: var(--teal);
+}
+
+.auth-back {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  color: var(--text-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 8px;
+  font-family: var(--font-body);
+}
+
+.auth-back:hover {
+  color: var(--text-1);
+}
