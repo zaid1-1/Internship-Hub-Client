@@ -94,12 +94,12 @@ export function SectionLabel({ children }) {
   return <p className="section-label">{children}</p>
 }
 
-export function BtnPrimary({ children, onClick, full }) {
-  return <button onClick={onClick} className={`btn-navy ${full ? 'btn-full' : ''}`}>{children}</button>
+export function BtnPrimary({ children, onClick, full, disabled }) {
+  return <button onClick={onClick} disabled={disabled} className={`btn-navy ${full ? 'btn-full' : ''}`}>{children}</button>
 }
 
-export function BtnOutline({ children, onClick, full }) {
-  return <button onClick={onClick} className={`btn-navy-outline ${full ? 'btn-full' : ''}`}>{children}</button>
+export function BtnOutline({ children, onClick, full, disabled }) {
+  return <button onClick={onClick} disabled={disabled} className={`btn-navy-outline ${full ? 'btn-full' : ''}`}>{children}</button>
 }
 
 export function BtnGhost({ children, onClick }) {

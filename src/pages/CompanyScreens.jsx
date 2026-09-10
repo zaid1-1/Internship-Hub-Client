@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios, { BASE_URL, authHeaders } from '../api'
+import { useAuth } from '../context/AuthContext'
 import {
   CompanyLayout, SectionLabel, Card, StatusPill, MatchChip, SkillTag,
   BtnPrimary, BtnOutline, BtnGhost, ActionBtn, TableHeader, idNameMap,
-  Input, Badge,
+  Input, Badge, Divider,
 } from '../components/shared'
 import '../css/CompanyDashboard.css'
 import '../css/MyOpportunities.css'
 import '../css/CompanyCandidates.css'
 import '../css/CompanyCandidateProfile.css'
+import '../css/CompanyProfile.css'
 import '../css/ProfilePage.css'
 import '../css/InternshipForm.css'
 import '../css/InternshipPreview.css'
@@ -867,12 +869,383 @@ export function InternshipPreview() {
   )
 }
 
+// ============================================================
+// COMPANY PROFILE EDIT (spec 15) - reached from the Company sidebar's
+// "Company Profile" link. Not the public CompanyProfile.jsx page
+// students/guests see at /companies/:id - this is the company editing
+// its own row. Same "load once, edit local state, PUT full body on Save"
+// pattern as ProfilePage.jsx's handleSave/handleDiscard, and the same
+// multipart upload technique for the logo (POST /api/companies/me/logo,
+// field name "logo") as ProfilePage.jsx's handlePhotoUpload for photos -
+// GET/PUT /api/companies/me and POST /me/logo all already existed on the
+// backend, nothing new added server-side for this screen.
+// ============================================================
+// Figma-accurate rebuild: opens read-only with an "Edit Company Profile"
+// button, only switching the fields (and revealing Save/Discard) once
+// `editing` is toggled on - same load/PUT/discard plumbing as before,
+// GET/PUT /api/companies/me and POST /me/logo are unchanged. Adds the
+// "Active Internship Listings" section from the Figma reference, reusing
+// GET /api/internships/mine (already built for the Dashboard/My
+// Opportunities screens) filtered client-side to Active, same
+// "fetch once, filter with .filter()" pattern as those pages.
 export function CompanyProfileEdit() {
-  return <Stub label="Company Profile" title="Company Profile" />
+  const navigate = useNavigate()
+  const [profile, setProfile] = useState(null)
+  const [locations, setLocations] = useState([])
+  const [fields, setFields] = useState([])
+  const [editing, setEditing] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [logoUploading, setLogoUploading] = useState(false)
+  const [logoError, setLogoError] = useState('')
+  const [activeInternships, setActiveInternships] = useState([])
+
+  function loadProfile() {
+    axios.get(`${BASE_URL}/api/companies/me`, { headers: authHeaders() }).then(res => {
+      setProfile(res.data)
+    }).catch(err => console.error(err))
+  }
+
+  useEffect(() => {
+    loadProfile()
+    axios.get(`${BASE_URL}/api/locations`).then(res => setLocations(res.data))
+    axios.get(`${BASE_URL}/api/fields`).then(res => setFields(res.data))
+    axios.get(`${BASE_URL}/api/internships/mine`, { headers: authHeaders() }).then(res => {
+      setActiveInternships(res.data.filter(i => i.status === 'Active'))
+    }).catch(err => console.error(err))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const setField = (key, value) => setProfile(prev => ({ ...prev, [key]: value }))
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setLogoError('')
+    setLogoUploading(true)
+    const formData = new FormData()
+    formData.append('logo', file)
+    try {
+      const res = await axios.post(`${BASE_URL}/api/companies/me/logo`, formData, { headers: authHeaders() })
+      setProfile(res.data)
+    } catch (err) {
+      console.error(err)
+      setLogoError('Could not upload logo. Please try again.')
+    } finally {
+      setLogoUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  const handleSave = async () => {
+    setSaveError('')
+    try {
+      const res = await axios.put(`${BASE_URL}/api/companies/me`, profile, { headers: authHeaders() })
+      setProfile(res.data)
+      setSaved(true)
+      setEditing(false)
+      setTimeout(() => setSaved(false), 2000)
+    } catch (err) {
+      console.error(err)
+      if (err.response) {
+        setSaveError(err.response.data?.message || err.response.data?.error || 'Something went wrong. Please try again.')
+      } else {
+        setSaveError(`Could not reach the server at ${BASE_URL}. Make sure the backend is running.`)
+      }
+    }
+  }
+
+  const handleDiscard = () => {
+    setSaveError('')
+    loadProfile()
+    setEditing(false)
+  }
+
+  if (!profile) {
+    return (
+      <CompanyLayout>
+        <div className="profile-wrap"><p className="profile-muted">Loading...</p></div>
+      </CompanyLayout>
+    )
+  }
+
+  const initials = profile.company_name
+    ? profile.company_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    : '?'
+
+  const locationsMap = idNameMap(locations)
+  const fieldsMap = idNameMap(fields)
+
+  return (
+    <CompanyLayout>
+      <div className="profile-wrap">
+        <div className="profile-page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div>
+            <SectionLabel>Company</SectionLabel>
+            <h1>Company Profile</h1>
+            <p>This information appears on your public company page and on every opportunity you post.</p>
+          </div>
+          {!editing && <BtnPrimary onClick={() => setEditing(true)}>Edit Company Profile</BtnPrimary>}
+        </div>
+
+        <div className="field-block">
+          <label className="field-label">Company Logo</label>
+          <div className="upload-row">
+            {profile.logo_url ? (
+              <img src={`${BASE_URL}${profile.logo_url}`} alt="" className="upload-avatar-preview" />
+            ) : (
+              <div className="upload-avatar-placeholder">{initials}</div>
+            )}
+            {editing && (
+              <div>
+                <input type="file" accept="image/*" id="logo-upload-input" className="upload-file-input" onChange={handleLogoUpload} />
+                <label htmlFor="logo-upload-input" className="btn-navy-outline upload-file-label">
+                  {logoUploading ? 'Uploading...' : 'Change Logo'}
+                </label>
+                <p className="field-note">JPG or PNG. Not mandatory.</p>
+              </div>
+            )}
+          </div>
+          {logoError && <p className="profile-save-error">{logoError}</p>}
+        </div>
+
+        {editing ? (
+          <>
+            <div className="field-grid">
+              <div className="field-block">
+                <label className="field-label">Company Name</label>
+                <Input value={profile.company_name || ''} onChange={v => setField('company_name', v)} />
+              </div>
+              <div className="field-block">
+                <label className="field-label">Industry</label>
+                <Input placeholder="e.g. Telecom" value={profile.industry || ''} onChange={v => setField('industry', v)} />
+              </div>
+              <div className="field-block">
+                <label className="field-label">Location</label>
+                <select className="form-select" value={profile.location_id || ''} onChange={e => setField('location_id', e.target.value || null)}>
+                  <option value="">Not specified</option>
+                  {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                </select>
+              </div>
+              <div className="field-block">
+                <label className="field-label">Company Size</label>
+                <Input placeholder="e.g. 500+" value={profile.company_size || ''} onChange={v => setField('company_size', v)} />
+              </div>
+              <div className="field-block">
+                <label className="field-label">Website</label>
+                <Input placeholder="yourcompany.com" value={profile.website || ''} onChange={v => setField('website', v)} />
+              </div>
+              <div className="field-block">
+                <label className="field-label">Contact Email</label>
+                <Input placeholder="hr@yourcompany.com" value={profile.contact_email || ''} onChange={v => setField('contact_email', v)} />
+              </div>
+            </div>
+
+            <div className="field-block">
+              <label className="field-label">About Company</label>
+              <textarea className="field-textarea" rows={5} value={profile.about || ''} onChange={e => setField('about', e.target.value)} />
+            </div>
+          </>
+        ) : (
+          <div className="field-block">
+            <h2 className="company-name-title">{profile.company_name}</h2>
+            <p className="profile-muted">
+              {[profile.industry, locationsMap[profile.location_id]].filter(Boolean).join(' · ')}
+            </p>
+            {profile.website && <p className="profile-muted">{profile.website}</p>}
+            {profile.about && (
+              <div className="mt-3">
+                <label className="field-label">About</label>
+                <p className="profile-muted">{profile.about}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {saveError && <p className="profile-save-error">{saveError}</p>}
+        {editing && (
+          <div className="profile-save-row">
+            <button className={`profile-save-btn ${saved ? 'saved' : ''}`} onClick={handleSave}>
+              {saved ? 'Changes Saved ✓' : 'Save Changes'}
+            </button>
+            <button className="btn-navy-outline" onClick={handleDiscard}>Discard Changes</button>
+          </div>
+        )}
+
+        <div className="mt-4">
+          <div className="cdash-section-head">
+            <div>
+              <SectionLabel>Opportunities</SectionLabel>
+              <h2 className="cdash-section-heading">Active Internship Listings</h2>
+            </div>
+          </div>
+
+          {activeInternships.length > 0 ? (
+            <div className="cdash-recent-list">
+              {activeInternships.map(i => (
+                <div key={i.id} className="cdash-recent-row">
+                  <div className="cdash-recent-main">
+                    <p className="cdash-recent-title">{i.title}</p>
+                    <p className="cdash-recent-sub">
+                      {[fieldsMap[i.field_id], locationsMap[i.location_id]].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  <span className="cdash-recent-deadline">
+                    {i.application_deadline ? new Date(i.application_deadline).toLocaleDateString() : 'No deadline'}
+                  </span>
+                  <div className="cdash-recent-actions">
+                    <ActionBtn label="View →" onClick={() => navigate(`/company/opportunities/${i.id}/preview`)} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Card className="p-4"><p className="cdash-muted">No active internship listings yet.</p></Card>
+          )}
+        </div>
+      </div>
+    </CompanyLayout>
+  )
 }
 
+// ============================================================
+// COMPANY SETTINGS (Figma-accurate rebuild) - Account Details (email
+// change), Change Password, and an Account Actions card with Log out +
+// Deactivate account (confirm modal). Notification Preferences is in the
+// Figma source but intentionally left out here per request. Backed by
+// three new self-service routes added to routes/auth.js this batch: PUT
+// /api/auth/email, PUT /api/auth/password, PUT /api/auth/deactivate - all
+// requireAuth (any logged-in role, since Student Settings below reuses
+// the first two), same plain UPDATE-query style as admin.js's own
+// status-change route.
+// ============================================================
 export function CompanySettings() {
-  return <Stub label="Settings" title="Company Settings" />
+  const { user, login, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const [email, setEmail] = useState(user?.email || '')
+  const [emailMsg, setEmailMsg] = useState('')
+  const [emailError, setEmailError] = useState('')
+
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [passwordMsg, setPasswordMsg] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+
+  const [showDeactivate, setShowDeactivate] = useState(false)
+  const [deactivating, setDeactivating] = useState(false)
+
+  const handleEmailUpdate = async () => {
+    setEmailError('')
+    setEmailMsg('')
+    try {
+      const res = await axios.put(`${BASE_URL}/api/auth/email`, { email }, { headers: authHeaders() })
+      login({ ...user, email: res.data.user.email })
+      setEmailMsg('Email updated.')
+    } catch (err) {
+      setEmailError(err.response?.data?.message || 'Could not update email.')
+    }
+  }
+
+  const handlePasswordUpdate = async () => {
+    setPasswordError('')
+    setPasswordMsg('')
+    try {
+      await axios.put(`${BASE_URL}/api/auth/password`, { currentPassword, newPassword }, { headers: authHeaders() })
+      setPasswordMsg('Password updated.')
+      setCurrentPassword('')
+      setNewPassword('')
+    } catch (err) {
+      setPasswordError(err.response?.data?.message || 'Could not update password.')
+    }
+  }
+
+  const handleDeactivate = async () => {
+    setDeactivating(true)
+    try {
+      await axios.put(`${BASE_URL}/api/auth/deactivate`, {}, { headers: authHeaders() })
+      logout()
+      navigate('/')
+    } catch (err) {
+      console.error(err)
+      setDeactivating(false)
+    }
+  }
+
+  return (
+    <CompanyLayout>
+      <div className="profile-wrap">
+        <div className="profile-page-header">
+          <SectionLabel>Account</SectionLabel>
+          <h1>Settings</h1>
+        </div>
+
+        <Card className="p-4 mb-3">
+          <SectionLabel>Account Details</SectionLabel>
+          <div className="field-block mb-0">
+            <label className="field-label">Email Address</label>
+            <div className="settings-inline-update">
+              <Input value={email} onChange={setEmail} type="email" />
+              <button className="settings-update-btn" onClick={handleEmailUpdate}>Update</button>
+            </div>
+            {emailMsg && <p className="settings-msg">{emailMsg}</p>}
+            {emailError && <p className="settings-error">{emailError}</p>}
+          </div>
+        </Card>
+
+        <Card className="p-4 mb-3">
+          <SectionLabel>Change Password</SectionLabel>
+          <div className="field-block">
+            <label className="field-label">Current Password</label>
+            <Input type="password" value={currentPassword} onChange={setCurrentPassword} placeholder="••••••••" />
+          </div>
+          <div className="field-block mb-0">
+            <label className="field-label">New Password</label>
+            <Input type="password" value={newPassword} onChange={setNewPassword} placeholder="Min. 8 characters" />
+          </div>
+          {passwordMsg && <p className="settings-msg">{passwordMsg}</p>}
+          {passwordError && <p className="settings-error">{passwordError}</p>}
+          <div className="mt-3">
+            <BtnPrimary onClick={handlePasswordUpdate}>Update Password</BtnPrimary>
+          </div>
+        </Card>
+
+        <Card className="p-4 settings-danger-card">
+          <SectionLabel>Account Actions</SectionLabel>
+          <div className="settings-action-row">
+            <div>
+              <p className="settings-action-title">Log out</p>
+              <p className="settings-action-sub">Sign out of your account on this device.</p>
+            </div>
+            <BtnOutline onClick={() => { logout(); navigate('/') }}>Log Out</BtnOutline>
+          </div>
+          <Divider />
+          <div className="settings-action-row">
+            <div>
+              <p className="settings-action-title">Deactivate account</p>
+              <p className="settings-action-sub">Temporarily disable your company account.</p>
+            </div>
+            <button className="settings-danger-btn" onClick={() => setShowDeactivate(true)}>Deactivate</button>
+          </div>
+        </Card>
+
+        {showDeactivate && (
+          <div className="confirm-modal-overlay">
+            <div className="confirm-modal-box">
+              <h3>Deactivate company account?</h3>
+              <p>Your account will be disabled and you'll be logged out immediately. Contact support to reactivate it later.</p>
+              <div className="confirm-modal-actions">
+                <BtnPrimary full onClick={handleDeactivate} disabled={deactivating}>
+                  {deactivating ? 'Deactivating...' : 'Deactivate'}
+                </BtnPrimary>
+                <BtnOutline full onClick={() => setShowDeactivate(false)}>Cancel</BtnOutline>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </CompanyLayout>
+  )
 }
 
 // ============================================================

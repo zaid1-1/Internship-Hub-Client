@@ -26,11 +26,39 @@
 
 .btn-navy { font-family: var(--font-sans); font-weight: 600; font-size: 14px; padding: 8px 16px; border-radius: var(--radius-sm) !important; background: var(--navy) !important; border-color: var(--navy) !important; }
 .btn-navy:hover { background: var(--navy-hover) !important; border-color: var(--navy-hover) !important; }
+.btn-navy:disabled { opacity: .5; cursor: not-allowed; }
 .btn-navy-outline { font-family: var(--font-sans); font-weight: 600; font-size: 14px; padding: 8px 16px; border-radius: var(--radius-sm) !important; color: var(--navy) !important; border: 1.5px solid var(--navy) !important; background: transparent !important; }
 .btn-navy-outline:hover { background: var(--navy-light) !important; }
+.btn-navy-outline:disabled { opacity: .5; cursor: not-allowed; }
 .btn-ghost { font-family: var(--font-sans); font-weight: 500; font-size: 14px; padding: 6px 12px; color: var(--text-2) !important; background: transparent !important; border: none !important; border-radius: var(--radius-sm) !important; }
 .btn-ghost:hover { background: #f1f5f9 !important; }
 .btn-full { width: 100%; }
+
+/* ── Settings screens (Company/Student) ─────────────────────────── */
+.settings-danger-card { border-left: 4px solid #fca5a5; }
+.settings-notice-box { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: 8px; background: var(--teal-light); border: 1px solid #99f6e4; }
+.settings-notice-icon { color: var(--teal); font-size: 14px; margin-top: 2px; flex-shrink: 0; }
+.settings-notice-title { font-size: 13px; color: #0f766e; margin: 0; line-height: 1.5; }
+.settings-notice-sub { font-size: 12px; color: #0d9488; margin: 6px 0 0; }
+
+.settings-inline-update { display: flex; gap: 8px; }
+.settings-inline-update .form-input { flex: 1; }
+.settings-update-btn { padding: 8px 16px; font-size: 13px; border-radius: var(--radius-sm); border: 1px solid var(--border); color: var(--text-2); background: var(--surface); flex-shrink: 0; font-family: var(--font-sans); font-weight: 500; }
+.settings-update-btn:hover { background: var(--bg); }
+
+.settings-action-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; flex-wrap: wrap; gap: 10px; }
+.settings-action-title { font-size: 13px; font-weight: 600; color: var(--text-1); margin: 0; }
+.settings-action-sub { font-size: 12px; color: var(--text-3); margin: 2px 0 0; }
+.settings-danger-btn { padding: 8px 16px; font-size: 13px; border-radius: var(--radius-sm); border: 1px solid #fca5a5; color: #dc2626; background: #fff5f5; font-family: var(--font-sans); font-weight: 500; }
+.settings-danger-btn:hover { background: #fee2e2; }
+.settings-msg { font-size: 12px; color: var(--teal); margin-top: 6px; }
+.settings-error { font-size: 12px; color: #dc2626; margin-top: 6px; }
+
+.confirm-modal-overlay { position: fixed; inset: 0; z-index: 1050; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.3); }
+.confirm-modal-box { width: 320px; padding: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+.confirm-modal-box h3 { font-size: 16px; font-weight: 700; color: var(--text-1); margin: 0 0 8px; }
+.confirm-modal-box p { font-size: 13px; color: var(--text-2); margin: 0 0 18px; }
+.confirm-modal-actions { display: flex; flex-direction: column; gap: 8px; }
 
 .ui-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
 .ui-card.clickable { cursor: pointer; transition: box-shadow .15s, border-color .15s; }
