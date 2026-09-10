@@ -1,7 +1,22 @@
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Modal } from 'react-bootstrap'
+import axios, { BASE_URL, authHeaders } from '../api'
 import { useAuth } from '../context/AuthContext'
 import './shared.css'
+
+// Turns a lookup table's rows ([{ id, name }, ...]) into a plain
+// { id: name } map, so cards/pages can resolve a foreign key id (e.g.
+// internship.location_id) back to its display name. Plain for loop,
+// same style as the backend's own id-collecting loops (see
+// routes/internships.js's interestFieldIds).
+export function idNameMap(list) {
+  const map = {}
+  for (let i = 0; i < list.length; i++) {
+    map[list[i].id] = list[i].name
+  }
+  return map
+}
 
 export function Logo({ size = 'md' }) {
   const navigate = useNavigate()
@@ -298,5 +313,153 @@ export function AuthModal({ show, onClose, action }) {
         </div>
       </Modal.Body>
     </Modal>
+  )
+}
+
+// ── Internship Card ──────────────────────────────────────────────
+// Used on Landing (featured), Browse, and Company Profile (active
+// listings). `lookups` is { locations, workArrangements, internshipTypes }
+// - each an { id: name } map built with idNameMap() from the matching
+// lookup table's GET response. `savedIds` (optional) is the logged-in
+// student's own saved internship ids, from GET /api/saved, so the Save
+// button reflects real state instead of always starting unsaved.
+export function InternshipCard({ internship, lookups, savedIds = [] }) {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const isStudent = user?.role === 'student'
+  const [saved, setSaved] = useState(savedIds.includes(internship.id))
+  const [showAuthModal, setShowAuthModal] = useState(false)
+
+  const initials = internship.company_name
+    ? internship.company_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    : '?'
+
+  const locationName = lookups.locations[internship.location_id]
+  const workArrangementName = lookups.workArrangements[internship.work_arrangement_id]
+  const internshipTypeName = lookups.internshipTypes[internship.internship_type_id]
+
+  const handleSave = async () => {
+    if (!isStudent) {
+      setShowAuthModal(true)
+      return
+    }
+    try {
+      if (saved) {
+        await axios.delete(`${BASE_URL}/api/saved/${internship.id}`, { headers: authHeaders() })
+        setSaved(false)
+      } else {
+        await axios.post(`${BASE_URL}/api/saved`, { internship_id: internship.id }, { headers: authHeaders() })
+        setSaved(true)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  return (
+    <div className="internship-card">
+      <div className="internship-card-top">
+        <CompanyLogo initials={initials} />
+        <div className="internship-card-heading">
+          <h3 className="internship-card-title">{internship.title}</h3>
+          <button className="internship-card-company" onClick={() => navigate(`/companies/${internship.company_id}`)}>
+            {internship.company_name}
+          </button>
+        </div>
+      </div>
+
+      <div className="internship-card-meta">
+        {locationName && <span className="internship-card-location">{locationName}</span>}
+        {workArrangementName && <Badge label={workArrangementName} />}
+        {internshipTypeName && <Badge label={internshipTypeName} />}
+        {internship.duration && <span className="internship-card-duration">{internship.duration}</span>}
+      </div>
+
+      <div className="internship-card-footer">
+        <span className="internship-card-deadline">
+          Deadline: {internship.application_deadline ? new Date(internship.application_deadline).toLocaleDateString() : '—'}
+        </span>
+        <div className="internship-card-actions">
+          <button className={`internship-save-btn ${saved ? 'saved' : ''}`} onClick={handleSave}>
+            {saved ? '♥ Saved' : '♡ Save'}
+          </button>
+          <button className="internship-view-btn" onClick={() => navigate(`/internships/${internship.id}`)}>
+            View Details
+          </button>
+        </div>
+      </div>
+
+      <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} action="save" />
+    </div>
+  )
+}
+
+// ── Filter Sidebar ───────────────────────────────────────────────
+// Fetches its own dropdown options (fields/locations/internship
+// types/work arrangements are admin-managed lookup tables, all public
+// GETs). `filters` + `onChange` are controlled by the parent page;
+// `onApply`/`onClear` let the parent decide when to actually re-fetch
+// the internship list, instead of firing a request on every keystroke.
+export function FilterSidebar({ filters, onChange, onApply, onClear }) {
+  const [fields, setFields] = useState([])
+  const [locations, setLocations] = useState([])
+  const [internshipTypes, setInternshipTypes] = useState([])
+  const [workArrangements, setWorkArrangements] = useState([])
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/api/fields`).then(res => setFields(res.data))
+    axios.get(`${BASE_URL}/api/locations`).then(res => setLocations(res.data))
+    axios.get(`${BASE_URL}/api/internship-types`).then(res => setInternshipTypes(res.data))
+    axios.get(`${BASE_URL}/api/work-arrangements`).then(res => setWorkArrangements(res.data))
+  }, [])
+
+  return (
+    <aside className="filter-sidebar">
+      <div className="filter-sidebar-card">
+        <div className="filter-sidebar-head">
+          <h3>Filters</h3>
+          <button className="filter-clear-btn" onClick={onClear}>Clear all</button>
+        </div>
+
+        <div className="filter-group">
+          <SectionLabel>Search</SectionLabel>
+          <Input placeholder="Title..." value={filters.keyword} onChange={v => onChange('keyword', v)} />
+        </div>
+        <Divider />
+        <div className="filter-group">
+          <SectionLabel>Field</SectionLabel>
+          <select className="form-select" value={filters.fieldId} onChange={e => onChange('fieldId', e.target.value)}>
+            <option value="">All fields</option>
+            {fields.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+          </select>
+        </div>
+        <Divider />
+        <div className="filter-group">
+          <SectionLabel>Location</SectionLabel>
+          <select className="form-select" value={filters.locationId} onChange={e => onChange('locationId', e.target.value)}>
+            <option value="">All locations</option>
+            {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+          </select>
+        </div>
+        <Divider />
+        <div className="filter-group">
+          <SectionLabel>Internship Type</SectionLabel>
+          <select className="form-select" value={filters.internshipTypeId} onChange={e => onChange('internshipTypeId', e.target.value)}>
+            <option value="">All types</option>
+            {internshipTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+        </div>
+        <Divider />
+        <div className="filter-group">
+          <SectionLabel>Work Arrangement</SectionLabel>
+          <select className="form-select" value={filters.workArrangementId} onChange={e => onChange('workArrangementId', e.target.value)}>
+            <option value="">All arrangements</option>
+            {workArrangements.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </select>
+        </div>
+
+        <BtnPrimary full onClick={onApply}>Apply Filters</BtnPrimary>
+      </div>
+    </aside>
   )
 }

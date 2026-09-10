@@ -1,0 +1,122 @@
+.browse-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.browse-header {
+  margin-bottom: 20px;
+}
+
+.browse-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+}
+
+.guest-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  background: var(--navy-light);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: var(--radius);
+}
+
+.guest-banner p {
+  font-size: 14px;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.guest-banner-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.guest-login-link {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.browse-body {
+  display: flex;
+  gap: 20px;
+}
+
+.browse-results {
+  flex: 1;
+  min-width: 0;
+}
+
+.browse-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.browse-count {
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.browse-count strong {
+  font-family: var(--font-mono);
+  color: var(--text-1);
+}
+
+.browse-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.browse-sort span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.browse-sort select {
+  width: auto;
+}
+
+.browse-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.browse-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-3);
+  font-size: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+@media (max-width: 800px) {
+  .browse-body { flex-direction: column; }
+  .filter-sidebar { width: 100%; }
+}
