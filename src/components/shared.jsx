@@ -323,7 +323,7 @@ export function AuthModal({ show, onClose, action }) {
 // lookup table's GET response. `savedIds` (optional) is the logged-in
 // student's own saved internship ids, from GET /api/saved, so the Save
 // button reflects real state instead of always starting unsaved.
-export function InternshipCard({ internship, lookups, savedIds = [] }) {
+export function InternshipCard({ internship, lookups, savedIds = [], matchScore }) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const isStudent = user?.role === 'student'
@@ -361,7 +361,10 @@ export function InternshipCard({ internship, lookups, savedIds = [] }) {
       <div className="internship-card-top">
         <CompanyLogo initials={initials} />
         <div className="internship-card-heading">
-          <h3 className="internship-card-title">{internship.title}</h3>
+          <div className="internship-card-title-row">
+            <h3 className="internship-card-title">{internship.title}</h3>
+            {matchScore !== undefined && <MatchChip value={matchScore} />}
+          </div>
           <button className="internship-card-company" onClick={() => navigate(`/companies/${internship.company_id}`)}>
             {internship.company_name}
           </button>
