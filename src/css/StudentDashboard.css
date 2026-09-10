@@ -228,3 +228,34 @@
   font-size: 13px;
   color: var(--text-4);
 }
+
+.quote-card {
+  border-left: 4px solid var(--teal);
+}
+
+.quote-text {
+  font-size: 15px;
+  font-family: var(--font-body);
+  color: var(--text-1);
+  font-style: italic;
+  margin: 4px 0 0;
+  padding: 0;
+  border: none;
+}
+
+.quote-author {
+  margin-top: 8px;
+  font-size: 12px;
+  font-style: normal;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
+.quote-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 4px;
+}

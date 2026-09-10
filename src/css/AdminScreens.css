@@ -1,0 +1,432 @@
+/* ── page wraps (per-screen max-width, matching the Figma source's own
+   p-8 + max-w-* per screen) ───────────────────────────────────────── */
+.admin-wrap-sm { padding: 32px; max-width: 672px; }
+.admin-wrap-md { padding: 32px; max-width: 896px; }
+.admin-wrap-lg { padding: 32px; max-width: 1024px; }
+.admin-wrap-xl { padding: 32px; max-width: 1152px; }
+
+.admin-loading { font-size: 13px; color: var(--text-3); }
+
+/* ── page header ──────────────────────────────────────────────────── */
+.admin-page-header { margin-bottom: 24px; }
+
+.admin-eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-4);
+  font-family: var(--font-sans);
+  margin: 0 0 4px;
+}
+
+.admin-page-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+.admin-page-sub {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 4px 0 0;
+}
+
+/* ── dashboard stat cards ─────────────────────────────────────────── */
+.admin-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 900px) {
+  .admin-stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.admin-stat-card {
+  text-align: left;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid transparent;
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: box-shadow .15s;
+}
+
+.admin-stat-card:hover { box-shadow: var(--shadow-md); }
+
+.admin-stat-value {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  margin: 0 0 4px;
+  line-height: 1;
+}
+
+.admin-stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+/* ── dashboard two-column body ────────────────────────────────────── */
+.admin-dash-cols {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 800px) {
+  .admin-dash-cols { grid-template-columns: 1fr; }
+}
+
+.admin-activity-card { padding: 0; overflow: hidden; }
+
+.admin-card-head { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+
+.admin-activity-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--bg);
+}
+
+.admin-activity-row:last-child { border-bottom: none; }
+.admin-activity-icon { flex-shrink: 0; margin-top: 1px; }
+
+.admin-activity-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.admin-activity-time {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-4);
+  font-family: var(--font-mono);
+}
+
+.admin-activity-empty {
+  padding: 20px;
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.admin-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.admin-quick-action-btn {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-2);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.admin-quick-action-btn:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+  background: var(--navy-light);
+}
+
+/* ── tabs (User Management, Opportunities, Reports, Platform Data) ──── */
+.admin-tabs {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.admin-tab {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--navy);
+  font-weight: 600;
+}
+
+/* ── table card / head / rows ─────────────────────────────────────── */
+.admin-table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.admin-thead {
+  display: grid;
+  padding: 10px 16px;
+  background: var(--navy-light);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-thead-col {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+}
+
+.admin-trow {
+  display: grid;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.admin-trow:hover { background: var(--navy-light); }
+
+.admin-row-link {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+}
+
+.admin-row-link:hover { text-decoration: underline; }
+
+.admin-cell-sub { font-size: 12px; color: var(--text-3); }
+.admin-cell-mono { font-size: 12px; color: var(--text-4); font-family: var(--font-mono); }
+.admin-cell-center { text-align: center; }
+.admin-cell-strong { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.admin-cell-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.admin-row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.admin-table-empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+.admin-company-cell { display: flex; align-items: center; gap: 8px; }
+
+/* Per-table column ratios, matching the Figma source's own gridCols for
+   each screen exactly. */
+.admusers-row-student { grid-template-columns: 2fr 2fr 1.5fr 1fr 1fr 1fr auto; }
+.admusers-row-company { grid-template-columns: 2fr 2fr 1.5fr 1fr 1fr auto; }
+.admcomp-row { grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr auto; }
+.admopps-row { grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr 1fr auto; }
+.admreports-row { grid-template-columns: 2fr 1.5fr 2fr 1.5fr 1fr 1fr auto; }
+.admplat-row { grid-template-columns: 2fr 1fr auto; }
+.admplat-row-skill { grid-template-columns: 2fr 1.5fr 1fr auto; }
+
+@media (max-width: 1100px) {
+  .admin-table-card { overflow-x: auto; }
+  .admusers-row-student, .admusers-row-company, .admcomp-row,
+  .admopps-row, .admreports-row {
+    min-width: 900px;
+  }
+}
+
+/* ── confirm modal (shared overlay/box from shared.css, admin-specific
+   horizontal button row instead of their stacked one) ──────────────── */
+.admin-confirm-box { width: 360px; }
+.admin-confirm-actions { display: flex; gap: 8px; }
+.admin-confirm-actions > * { flex: 1; }
+
+/* ── breadcrumb (User Details, Opportunity Details) ──────────────────── */
+.admin-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-4);
+  margin-bottom: 20px;
+}
+
+.admin-breadcrumb button {
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  color: var(--text-4);
+}
+
+.admin-breadcrumb button:hover { color: var(--navy); }
+.admin-breadcrumb-current { color: var(--text-2); }
+
+/* ── opportunity details header ──────────────────────────────────────── */
+.admin-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.admin-detail-head h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  margin: 2px 0 2px;
+}
+
+/* ── info grids (User Details, Opportunity Details) ───────────────────── */
+.admin-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.admin-info-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 600px) {
+  .admin-info-grid, .admin-info-grid-3 { grid-template-columns: 1fr; }
+}
+
+.admin-info-label {
+  font-size: 11px;
+  color: var(--text-4);
+  font-family: var(--font-sans);
+  margin: 0 0 3px;
+}
+
+.admin-info-value { font-size: 13px; font-weight: 500; color: var(--text-1); margin: 0; }
+.admin-info-mono { font-family: var(--font-mono); }
+
+/* ── platform notice card (User Details) ─────────────────────────────── */
+.admin-notice-card { background: var(--teal-light); border-left: 4px solid var(--teal); }
+.admin-notice-text { font-size: 12px; color: var(--text-3); margin: 4px 0 0; }
+
+/* ── report information card (Opportunity Details) ───────────────────── */
+.admin-report-card { background: #fffbeb; border: 1px solid #fcd34d; border-left: 4px solid #d97706; }
+
+/* ── actions rows / destructive link ─────────────────────────────────── */
+.admin-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.admin-delete-link {
+  padding: 8px 16px;
+  font-size: 13px;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  background: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+}
+
+.admin-delete-link:hover { background: #fef2f2; }
+
+/* ── description / skills / external url (Opportunity Details) ───────── */
+.admin-description-block { margin-top: 14px; }
+.admin-description-text { font-size: 13px; line-height: 1.6; color: var(--text-2); margin: 4px 0 0; }
+
+.admin-skill-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+.admin-skill-tag {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--navy);
+  background: var(--navy-light);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-sm);
+}
+
+.admin-external-url {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--teal);
+  background: var(--teal-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+}
+
+/* ── platform data toolbar / add form / inline edit ──────────────────── */
+.admin-platform-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.admin-platform-toolbar p { font-size: 13px; color: var(--text-3); margin: 0; }
+.admin-platform-toolbar-name { font-weight: 600; color: var(--text-1); }
+
+.admin-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-add-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  margin-bottom: 6px;
+}
+
+.admin-inline-edit { display: flex; align-items: center; gap: 6px; }
+
+/* ── admin settings field blocks (mirrors ProfilePage.css's
+   .field-block/.field-label, kept local here so this screen doesn't need
+   to import an unrelated stylesheet) ─────────────────────────────────── */
+.admin-field-block { margin-bottom: 14px; }
+
+.admin-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+  margin-bottom: 6px;
+  display: block;
+}
